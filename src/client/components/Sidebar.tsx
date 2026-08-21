@@ -3,7 +3,7 @@
  * Re-roots when the session cwd changes (session switch follows the store).
  * @module dsh-workbench-window/client-sidebar
  */
-import { useEffect, useSyncExternalStore } from 'react'
+import { useEffect, useSyncExternalStore, useState } from 'react'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import { api } from '../api.ts'
 import { FileTree } from './FileTree.tsx'
@@ -41,6 +41,8 @@ const VIEW_TITLE: Record<SidebarView, string> = {
 /** The sidebar component (file tree seat). */
 export function Sidebar({ view, onViewChange, store, refreshToken, t }: SidebarProps) {
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot)
+  /** 根目录是否折叠（点击根目录切换整个文件树）。 */
+  const [rootCollapsed, setRootCollapsed] = useState(false)
 
   // Bind the session cwd into the store so the tree re-roots on switch.
   useEffect(() => {
@@ -62,16 +64,24 @@ export function Sidebar({ view, onViewChange, store, refreshToken, t }: SidebarP
       </div>
       {view === 'files' ? (
         <div className={css.sidebarBody}>
-          {state.cwd !== undefined ? <div className={css.cwdBar} title={state.cwd}>{state.cwd.split(/[\\/]/).pop()}</div> : null}
-          <FileTree
-            scope={state.sessionId === undefined ? undefined : { sessionId: state.sessionId, cwd: state.cwd }}
-            expanded={state.expanded}
-            selected={state.selected}
-            onToggleExpanded={(path) => store.reduce(toggleExpanded(path))}
-            onSelect={(path) => store.reduce(s => ({ ...s, selected: path }))}
-            onOpen={(path) => store.reduce(openTab(path))}
-            refreshToken={refreshToken}
-          />
+          {state.cwd !== undefined ? (
+            <button type="button" className={css.rootRow} title={state.cwd}
+              onClick={() => setRootCollapsed(c => !c)}>
+              <span className={css.rootTwisty}>{rootCollapsed ? '▶' : '▼'}</span>
+              <span className={css.rootName}>{state.cwd.split(/[\\/]/).pop()}</span>
+            </button>
+          ) : null}
+          {rootCollapsed ? null : (
+            <FileTree
+              scope={state.sessionId === undefined ? undefined : { sessionId: state.sessionId, cwd: state.cwd }}
+              expanded={state.expanded}
+              selected={state.selected}
+              onToggleExpanded={(path) => store.reduce(toggleExpanded(path))}
+              onSelect={(path) => store.reduce(s => ({ ...s, selected: path }))}
+              onOpen={(path) => store.reduce(openTab(path))}
+              refreshToken={refreshToken}
+            />
+          )}
         </div>
       ) : view === 'git' ? (
         <div className={css.sidebarBody}>
