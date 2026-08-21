@@ -68,7 +68,7 @@ export function Editor({ scope, tabs, activeTabId, onActivate, onClose, onRegist
       </div>
       <div className={css.content}>
         {active === undefined || scope === undefined
-          ? <div className={css.placeholder}>选择文件以查看内容</div>
+          ? null
           : active.kind === 'diff'
             ? <DiffViewer scope={scope} path={active.diffPath ?? ''} staged={active.staged === true}
                 onClose={() => onClose(active.id)} t={t} />
