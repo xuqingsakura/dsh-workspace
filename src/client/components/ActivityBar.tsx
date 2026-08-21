@@ -3,11 +3,11 @@
  * @module dsh-workbench-window/client-activity-bar
  */
 import type { ReactNode } from 'react'
-import { ExplorerIcon, ScmIcon, SearchIcon, SettingsIcon } from './icons.tsx'
+import { ExplorerIcon, ScmIcon, SearchIcon, SettingsIcon, BrowserIcon, TasksIcon } from './icons.tsx'
 import css from '../styles/root.module.css'
 
 /** One activity view key. */
-export type ActivityView = 'explorer' | 'search' | 'scm' | 'settings'
+export type ActivityView = 'explorer' | 'search' | 'scm' | 'browser' | 'tasks' | 'settings'
 
 /** Props for the activity bar. */
 export interface ActivityBarProps {
@@ -21,6 +21,8 @@ export function ActivityBar({ active, onSelect }: ActivityBarProps) {
     { view: 'explorer', label: '资源管理器', icon: <ExplorerIcon /> },
     { view: 'search', label: '搜索', icon: <SearchIcon /> },
     { view: 'scm', label: '源代码管理', icon: <ScmIcon /> },
+    { view: 'browser', label: '浏览器', icon: <BrowserIcon /> },
+    { view: 'tasks', label: '任务', icon: <TasksIcon /> },
   ]
   const bottom: Array<{ view: ActivityView; label: string; icon: ReactNode }> = [
     { view: 'settings', label: '管理', icon: <SettingsIcon /> },

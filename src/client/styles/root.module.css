@@ -167,6 +167,18 @@
 /* The conversation bridge fills the chat pane. */
 .chatPane > * { flex: 1; min-height: 0; }
 
+/* 对话区：顶部会话切换条 + 对话主体 */
+.chatHeader {
+  flex: none;
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-1);
+}
+.chatBody { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
 /* Sidebar */
 .sidebar {
   display: flex;

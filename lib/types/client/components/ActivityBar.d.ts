@@ -1,5 +1,5 @@
 /** One activity view key. */
-export type ActivityView = 'explorer' | 'search' | 'scm' | 'settings';
+export type ActivityView = 'explorer' | 'search' | 'scm' | 'browser' | 'tasks' | 'settings';
 /** Props for the activity bar. */
 export interface ActivityBarProps {
     active: ActivityView;

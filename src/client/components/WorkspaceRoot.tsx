@@ -1,15 +1,10 @@
 /**
- * Workspace root: the detached workspace-window layout (VSCode style). Rendered
- * as the `workspace.shell` occupant when the host boots with
- * ?dshWindow=workspace — it owns the whole window: menu bar, activity bar,
- * sidebar file tree, center editor, the conversation via the render bridge,
- * the bottom terminal, and the status bar.
+ * 工作台根布局：独立工作台窗口（VSCode 风格）。作为 `workspace.shell` seat 的
+ * 宿主，在 ?dshWindow=workspace 时拥有整个窗口：菜单栏、活动栏、侧边栏、
+ * 中间编辑/浏览器列、对话（renderConversation 桥）、底部终端。
  *
- * Column layout: sidebar | editor | chat default to a 1:2:1 split (editor twice the others); dragging a
- * handle converts that column to a fixed pixel width (the chat absorbs the
- * remainder). The activity bar and sidebar span the full body height, and the
- * bottom terminal lives under the editor+chat row only, so opening it never
- * shrinks the left rail nor covers the file tree.
+ * 列布局：侧边栏 | 编辑/浏览器 | 对话 默认 1:2:1，可拖拽；活动栏与侧边栏
+ * 占满整列高度，底部终端只位于编辑+对话下方。
  * @module dsh-workbench-window/client-root
  */
 import { useCallback, useRef, useState, useSyncExternalStore } from 'react'
@@ -20,36 +15,50 @@ import { ActivityBar, type ActivityView } from './ActivityBar.tsx'
 import { Sidebar, type SidebarView } from './Sidebar.tsx'
 import { Editor } from './Editor.tsx'
 import { BottomTerminal } from './BottomTerminal.tsx'
-import { StatusBar } from './StatusBar.tsx'
+import { BrowserPanel } from './BrowserPanel.tsx'
+import { SessionSwitcher } from './SessionSwitcher.tsx'
 import css from '../styles/root.module.css'
 
-/** Full props of the workspace root (framework share + owner + store). */
+/** 工作台根 props（框架共享 + owner + store）。 */
+/** 会话列表快照（宽松结构，避免依赖 api-remotes 的 client bundle purity 门禁）。 */
+export interface SessionListSnapshot {
+  ids: string[]
+  byId: Record<string, { title?: string }>
+  current: string | undefined
+}
+
+/** 会话服务的最小面（open 切换 + list 只读）。 */
+export interface SessionsLike {
+  open(id: string): void
+  list: { getSnapshot(): SessionListSnapshot; subscribe(listener: () => void): () => void }
+}
+
 export type WorkspaceRootProps =
   PropsRuntime<'workspace.shell'>
   & PropsLocale<'workbench'>
   & WorkspaceShellOwnerProps
-  & { store: WorkspaceStore }
+  & { store: WorkspaceStore; sessions: SessionsLike }
 
-/** Dragged column widths in pixels; undefined means "not dragged yet" (1:1:1). */
+/** 拖拽列宽（像素）；undefined 表示未拖拽（1:1:1）。 */
 interface Columns {
   sidebar: number
   editor: number
 }
 
-/** One active drag session (pointer origin + widths frozen at drag start). */
+/** 一次拖拽会话（指针起点 + 拖拽开始时冻结的列宽）。 */
 interface DragSession {
   side: 'sidebar' | 'editor'
   startX: number
   base: Columns
 }
 
-/** Sanity bounds for the resizable columns (VSCode-like floor/ceiling). */
+/** 可调整列的合理范围（VSCode 风格下限/上限）。 */
 const MIN_SIDEBAR = 180
 const MAX_SIDEBAR = 760
 const MIN_EDITOR = 260
 const MAX_EDITOR = 1100
 
-/** Clamp a pixel width into [min, max]. */
+/** 把像素宽夹在 [min, max] 内。 */
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value))
 }
@@ -60,49 +69,113 @@ const ACTIVITY_TO_SIDEBAR: Record<ActivityView, SidebarView> = {
   scm: 'git',
   search: 'search',
   settings: 'settings',
+  browser: 'files',
+  tasks: 'tasks',
 }
 
-/** 侧边栏视图 -> 活动栏图标反向映射（点侧边栏 tab 时同步高亮；无对应图标的归到 explorer）。 */
+/** 侧边栏视图 -> 活动栏图标反向映射（点侧边栏 tab 时同步高亮）。 */
 const SIDEBAR_TO_ACTIVITY: Record<SidebarView, ActivityView> = {
   files: 'explorer',
   git: 'scm',
   search: 'search',
   settings: 'settings',
-  tasks: 'explorer',
+  tasks: 'tasks',
   browser: 'explorer',
 }
 
+/** 中间列视图：编辑器 或 浏览器（浏览器放阅读区，占大空间）。 */
+type CenterView = 'editor' | 'browser'
+
+/** 菜单栏定义：每个菜单下的条目。 */
+const MENUS: Record<string, Array<{ id: string; label: string }>> = {
+  '文件': [
+    { id: 'refresh', label: '刷新' },
+    { id: 'openTerminal', label: '打开终端' },
+  ],
+  '编辑': [
+    { id: 'copyPath', label: '复制当前文件路径' },
+  ],
+  '查看': [
+    { id: 'files', label: '资源管理器' },
+    { id: 'git', label: '源代码管理' },
+    { id: 'search', label: '搜索' },
+    { id: 'browser', label: '浏览器' },
+    { id: 'tasks', label: '任务' },
+  ],
+  '转到': [
+    { id: 'goFile', label: '转到文件（搜索）' },
+    { id: 'goGit', label: '转到源代码管理' },
+  ],
+  '终端': [
+    { id: 'openTerminal', label: '打开终端' },
+  ],
+  '帮助': [
+    { id: 'about', label: '关于 DeepSeek Harness 工作台' },
+  ],
+}
+
 /**
- * The detached workspace window root: one full-window VSCode-style layout.
- * @param props - framework share, the conversation bridge, and the store.
+ * 工作台根组件。
+ * @param props - 框架共享、对话桥、store。
  */
-export function WorkspaceRoot({ renderConversation, store, t }: WorkspaceRootProps) {
+export function WorkspaceRoot({ renderConversation, store, sessions, t }: WorkspaceRootProps) {
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot)
+  const sessionState = useSyncExternalStore(sessions.list.subscribe, sessions.list.getSnapshot)
   const [activity, setActivity] = useState<ActivityView>('explorer')
   const [sidebarView, setSidebarView] = useState<SidebarView>('files')
-
-  /** 点击活动栏图标：切换高亮并联动侧边栏视图。 */
-  const onActivitySelect = useCallback((view: ActivityView): void => {
-    setActivity(view)
-    setSidebarView(ACTIVITY_TO_SIDEBAR[view])
-  }, [])
-
-  /** 点击侧边栏内部 tab：切换视图并同步活动栏高亮。 */
-  const onSidebarViewChange = useCallback((view: SidebarView): void => {
-    setSidebarView(view)
-    setActivity(SIDEBAR_TO_ACTIVITY[view])
-  }, [])
+  const [centerView, setCenterView] = useState<CenterView>('editor')
   const [terminalOpen, setTerminalOpen] = useState(false)
-  /** 当前打开的下拉菜单名（undefined = 全部收起）。 */
   const [openMenu, setOpenMenu] = useState<string | undefined>(undefined)
-  // undefined = untouched: the three columns split 1:2:1 (editor widest).
+  // undefined = 未拖拽：三列按 1:2:1 弹性分配。
   const [columns, setColumns] = useState<Columns | undefined>(undefined)
 
   const rowRef = useRef<HTMLDivElement | null>(null)
   const sideRef = useRef<HTMLDivElement | null>(null)
   const dragRef = useRef<DragSession | null>(null)
 
-  /** Measure the current columns so an untouched layout can seed a drag base. */
+  /** 点击活动栏图标：切换高亮、联动侧边栏；浏览器切到中间列。 */
+  const onActivitySelect = useCallback((view: ActivityView): void => {
+    setActivity(view)
+    if (view === 'browser') {
+      setCenterView('browser')
+      setSidebarView('files')
+    } else {
+      setCenterView('editor')
+      setSidebarView(ACTIVITY_TO_SIDEBAR[view])
+    }
+  }, [])
+
+  /** 点击侧边栏视图变化：切换视图并同步活动栏高亮。 */
+  const onSidebarViewChange = useCallback((view: SidebarView): void => {
+    setSidebarView(view)
+    setActivity(SIDEBAR_TO_ACTIVITY[view])
+    if (view === 'browser') setCenterView('browser')
+  }, [])
+
+  /** 菜单项选择处理。 */
+  const onMenuSelect = useCallback((menu: string, id: string): void => {
+    setOpenMenu(undefined)
+    if (id === 'openTerminal') { setTerminalOpen(true); return }
+    if (id === 'refresh') { window.location.reload(); return }
+    if (id === 'copyPath') {
+      const active = state.tabs.find(tab => tab.id === state.activeTabId)
+      if (active !== undefined && active.path !== undefined) void navigator.clipboard?.writeText(active.path)
+      return
+    }
+    if (menu === '查看') {
+      if (id === 'browser') { setCenterView('browser'); setActivity('browser'); return }
+      onSidebarViewChange(id as SidebarView)
+      return
+    }
+    if (menu === '转到') {
+      if (id === 'goFile') onSidebarViewChange('search')
+      else if (id === 'goGit') onSidebarViewChange('git')
+      return
+    }
+    if (id === 'about') { window.alert('DeepSeek Harness 工作台 v0.1.0'); return }
+  }, [state.tabs, state.activeTabId, onSidebarViewChange])
+
+  /** 测量当前列宽，供未拖拽布局做拖拽基准。 */
   const measureBase = useCallback((): Columns => {
     const side = sideRef.current
     const row = rowRef.current
@@ -112,14 +185,14 @@ export function WorkspaceRoot({ renderConversation, store, t }: WorkspaceRootPro
     }
   }, [])
 
-  /** Pointer down: freeze the base widths and capture the pointer. */
+  /** 指针按下：冻结基准列宽并捕获指针。 */
   const onHandleDown = useCallback((side: 'sidebar' | 'editor') => (event: React.PointerEvent<HTMLDivElement>) => {
     event.preventDefault()
     event.currentTarget.setPointerCapture(event.pointerId)
     dragRef.current = { side, startX: event.clientX, base: columns ?? measureBase() }
   }, [columns, measureBase])
 
-  /** Pointer move: resize the dragged column; chat keeps the remainder. */
+  /** 指针移动：调整被拖列，对话吸收剩余宽度。 */
   const onHandleMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
     const session = dragRef.current
     if (session === null || !event.currentTarget.hasPointerCapture(event.pointerId)) return
@@ -140,40 +213,23 @@ export function WorkspaceRoot({ renderConversation, store, t }: WorkspaceRootPro
     dragRef.current = null
   }, [])
 
-  // Inline flex: an untouched column stays flexible (1:1:1); a dragged one
-  // becomes a fixed flex-basis so the chat absorbs the remaining width.
+  // 内联 flex：未拖拽列保持弹性（1:1:1），拖拽后固定为像素 flex-basis。
   const paneStyle = (width: number | undefined): React.CSSProperties | undefined =>
     width === undefined ? undefined : { flex: `0 0 ${width}px` }
 
   return (
     <div className={css.root}>
       <nav className={css.menubar} aria-label="菜单栏">
-        {['文件', '编辑', '查看', '转到', '终端', '帮助'].map(label => (
+        {Object.keys(MENUS).map(label => (
           <div key={label} className={css.menuWrap}>
             <button type="button" className={css.menubarItem}
               onClick={() => setOpenMenu(openMenu === label ? undefined : label)}>{label}</button>
-            {label === '查看' && openMenu === '查看' ? (
+            {openMenu === label ? (
               <div className={css.menuDropdown}>
-                {[
-                  { id: 'files', label: '资源管理器' },
-                  { id: 'git', label: '源代码管理' },
-                  { id: 'search', label: '搜索' },
-                  { id: 'browser', label: '浏览器' },
-                  { id: 'tasks', label: '任务' },
-                ].map(item => (
+                {(MENUS[label] ?? []).map(item => (
                   <button key={item.id} type="button" className={css.menuItem}
-                    onClick={() => {
-                      // 统一走反向映射，tasks/browser 归到 explorer 高亮，避免强转无效 ActivityView。
-                      onSidebarViewChange(item.id as SidebarView)
-                      setOpenMenu(undefined)
-                    }}>{item.label}</button>
+                    onClick={() => onMenuSelect(label, item.id)}>{item.label}</button>
                 ))}
-              </div>
-            ) : null}
-            {label === '终端' && openMenu === '终端' ? (
-              <div className={css.menuDropdown}>
-                <button type="button" className={css.menuItem}
-                  onClick={() => { setTerminalOpen(true); setOpenMenu(undefined) }}>打开终端</button>
               </div>
             ) : null}
           </div>
@@ -196,10 +252,12 @@ export function WorkspaceRoot({ renderConversation, store, t }: WorkspaceRootPro
         <div className={css.mainCol}>
           <div ref={rowRef} className={css.rightRow}>
             <div className={css.editorPane} style={paneStyle(columns?.editor)}>
-              <Editor scope={state.sessionId === undefined ? undefined : { sessionId: state.sessionId, cwd: state.cwd }}
-                tabs={state.tabs} activeTabId={state.activeTabId} t={t}
-                onActivate={(id) => { store.reduce(s => ({ ...s, activeTabId: id })) }}
-                onClose={(id) => { store.reduce(closeTab(id)) }} />
+              {centerView === 'browser'
+                ? <BrowserPanel t={t} />
+                : <Editor scope={state.sessionId === undefined ? undefined : { sessionId: state.sessionId, cwd: state.cwd }}
+                    tabs={state.tabs} activeTabId={state.activeTabId} t={t}
+                    onActivate={(id) => { store.reduce(s => ({ ...s, activeTabId: id })) }}
+                    onClose={(id) => { store.reduce(closeTab(id)) }} />}
             </div>
             <div
               className={css.handle}
@@ -211,18 +269,28 @@ export function WorkspaceRoot({ renderConversation, store, t }: WorkspaceRootPro
               onPointerUp={onHandleUp}
             />
             <div className={css.chatPane}>
-              {renderConversation()}
+              <div className={css.chatHeader}>
+                <SessionSwitcher
+                  ids={sessionState.ids}
+                  byId={sessionState.byId}
+                  current={sessionState.current}
+                  onOpen={(id) => sessions.open(id)}
+                  t={t}
+                />
+              </div>
+              <div className={css.chatBody}>
+                {renderConversation()}
+              </div>
             </div>
           </div>
           <BottomTerminal open={terminalOpen} onClose={() => { setTerminalOpen(false) }} sessionId={state.sessionId} t={t} />
         </div>
       </div>
-      <StatusBar scope={state.sessionId === undefined ? undefined : { sessionId: state.sessionId, cwd: state.cwd }} t={t} />
     </div>
   )
 }
 
-/** Immutable close-tab reducer (keeps the active tab valid). */
+/** 不可变关闭标签 reducer（保持活动标签有效）。 */
 function closeTab(tabId: string): (s: import('../state/workspace-store.ts').WorkspaceState) => import('../state/workspace-store.ts').WorkspaceState {
   return (s) => {
     const index = s.tabs.findIndex(tab => tab.id === tabId)

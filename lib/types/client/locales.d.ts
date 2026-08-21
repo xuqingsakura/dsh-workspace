@@ -30,6 +30,7 @@ export declare const zh: {
     readonly 'terminal.new': "新建终端";
     readonly 'terminal.clear': "清屏";
     readonly 'terminal.closePanel': "关闭终端面板";
+    readonly 'session.switch': "切换会话";
     readonly 'browser.back': "后退";
     readonly 'browser.forward': "前进";
     readonly 'browser.home': "首页";

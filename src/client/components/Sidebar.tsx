@@ -26,6 +26,16 @@ export interface SidebarProps {
   t: TranslateNS<typeof NS>
 }
 
+/** 侧边栏标题随视图变化。 */
+const VIEW_TITLE: Record<SidebarView, string> = {
+  files: '资源管理器',
+  git: '源代码管理',
+  search: '搜索',
+  settings: '设置',
+  browser: '浏览器',
+  tasks: '任务',
+}
+
 /** The sidebar component (file tree seat). */
 export function Sidebar({ view, onViewChange, store, t }: SidebarProps) {
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot)
@@ -43,19 +53,10 @@ export function Sidebar({ view, onViewChange, store, t }: SidebarProps) {
   return (
     <aside className={css.sidebar}>
       <div className={css.sidebarHeader}>
-        <span className={css.sidebarTitle}>资源管理器</span>
+        <span className={css.sidebarTitle}>{VIEW_TITLE[view]}</span>
         <span className={css.sidebarActions}>
           <button type="button" className={css.iconBtn} title="刷新" aria-label="刷新">↻</button>
         </span>
-      </div>
-      <div className={css.sidebarTabs}>
-        {(['files', 'git', 'browser', 'tasks'] as const).map(key => (
-          <button key={key} type="button"
-            className={`${css.sidebarTab} ${view === key ? css.sidebarTabActive : ''}`}
-            onClick={() => onViewChange(key)}>
-            {{ files: '文件', git: 'Git', browser: '浏览器', tasks: '任务' }[key]}
-          </button>
-        ))}
       </div>
       {view === 'files' ? (
         <div className={css.sidebarBody}>
@@ -86,7 +87,12 @@ export function Sidebar({ view, onViewChange, store, t }: SidebarProps) {
           />
         </div>
       ) : view === 'settings' ? (
-        <div className={css.sidebarPlaceholder}>管理（开发中）</div>
+        <div className={css.sidebarBody}>
+          <div className={css.sidebarPlaceholder}>
+            <div className={css.settingsHint}>设置请在主窗口操作</div>
+            <button type="button" className={css.iconBtn} onClick={() => window.close()}>返回主窗口</button>
+          </div>
+        </div>
       ) : view === 'browser' ? (
         <div className={css.sidebarBody}>
           <BrowserPanel t={t} />

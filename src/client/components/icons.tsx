@@ -87,6 +87,27 @@ export function ScmIcon(): ReactNode {
   )
 }
 
+/** Activity-bar icon: embedded browser (window + globe). */
+export function BrowserIcon(): ReactNode {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M3 9h18" />
+      <circle cx="6.5" cy="6.5" r="0.5" /><circle cx="9.5" cy="6.5" r="0.5" />
+    </svg>
+  )
+}
+
+/** Activity-bar icon: tasks (list + check). */
+export function TasksIcon(): ReactNode {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 6h16M4 12h16M4 18h9" />
+      <path d="M16 17l2 2 3-3" />
+    </svg>
+  )
+}
+
 /** Activity-bar icon: settings gear. */
 export function SettingsIcon(): ReactNode {
   return (

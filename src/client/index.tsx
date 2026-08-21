@@ -24,7 +24,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
 import type {} from './shell-slot.d.ts'
 import { createWorkspaceStore } from './state/workspace-store.ts'
-import { WorkspaceRoot, type WorkspaceRootProps } from './components/WorkspaceRoot.tsx'
+import { WorkspaceRoot, type WorkspaceRootProps, type SessionListSnapshot } from './components/WorkspaceRoot.tsx'
 import { WorkbenchLaunch, type WorkbenchLaunchProps } from './components/WorkbenchLaunch.tsx'
 import { en, NS, zh, type WorkspaceKey } from './locales.ts'
 
@@ -101,7 +101,16 @@ export function apply(ctx: ClientContext): void {
     ctx.slots.inject('workspace.shell', () => ctx.slots.register({
       name: 'workspace.shell',
       locale: NS,
-      inject: (): Pick<WorkspaceRootProps, 'store'> => ({ store }),
+      inject: (): Pick<WorkspaceRootProps, 'store' | 'sessions'> => ({
+        store,
+        sessions: {
+          open: (id) => ctx.sessions.open(id as never),
+          list: {
+            getSnapshot: () => ctx.sessions.list.getSnapshot() as unknown as SessionListSnapshot,
+            subscribe: (listener) => ctx.sessions.list.subscribe(listener),
+          },
+        },
+      }),
     }, WorkspaceRoot))
   }
 }

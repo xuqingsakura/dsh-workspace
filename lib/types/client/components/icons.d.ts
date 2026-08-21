@@ -18,6 +18,10 @@ export declare function ExplorerIcon(): ReactNode;
 export declare function SearchIcon(): ReactNode;
 /** Activity-bar icon: source control (git branch). */
 export declare function ScmIcon(): ReactNode;
+/** Activity-bar icon: embedded browser (window + globe). */
+export declare function BrowserIcon(): ReactNode;
+/** Activity-bar icon: tasks (list + check). */
+export declare function TasksIcon(): ReactNode;
 /** Activity-bar icon: settings gear. */
 export declare function SettingsIcon(): ReactNode;
 //# sourceMappingURL=icons.d.ts.map
