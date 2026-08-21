@@ -1,0 +1,16 @@
+{
+  "id": "dsh-external/dsh-workbench-window",
+  "version": "0.1.0",
+  "main": "./lib/index.js",
+  "description": "VSCode 风格独立工作台窗口：文件树 / 编辑器 / 终端 / Git / 浏览器，按会话隔离。独立窗口模式，会话切换与文件树联动。",
+  "engines": {
+    "dsh": ">=0.0.1"
+  },
+  "contributes": {
+    "tools": [],
+    "skills": []
+  },
+  "client": {
+    "main": "./lib/client-registry.js"
+  }
+}

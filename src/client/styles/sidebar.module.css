@@ -1,0 +1,47 @@
+/* Sidebar file tree styles. */
+.tree { flex: 1; min-height: 0; overflow: auto; padding: 6px 0; }
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  height: 26px;
+  padding-right: 10px;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  color: var(--dsw-alias-label-secondary);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+.row:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); }
+.rowSelected { background: var(--dsw-alias-interactive-bg-active); color: var(--dsw-alias-label-primary); }
+
+.twisty {
+  width: 16px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--dsw-alias-label-tertiary);
+  transition: transform 120ms var(--dsw-ease-in-out, ease);
+}
+.twistyClosed { transform: rotate(-90deg); }
+
+.icon { width: 16px; flex: none; display: inline-flex; align-items: center; justify-content: center; }
+.name { overflow: hidden; text-overflow: ellipsis; }
+
+.empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-size: 12px;
+  color: var(--dsw-alias-label-tertiary);
+  text-align: center;
+}

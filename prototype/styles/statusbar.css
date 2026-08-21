@@ -1,0 +1,50 @@
+/* statusbar.css — 底部状态栏（VSCode 风格） */
+
+.statusbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 10px;
+  background: var(--brand);
+  color: #ffffff;
+  font-size: var(--font-xs);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.statusbar__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  padding: 0 6px;
+  opacity: 0.95;
+  cursor: default;
+  transition: background var(--dur-fast) var(--ease);
+}
+.statusbar__item:hover { background: rgb(0 0 0 / 0.15); }
+.statusbar__spacer { flex: 1; }
+.statusbar__item--bell { font-size: 12px; }
+
+/* 菜单栏（标题栏下方） */
+.menubar {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 8px;
+  background: var(--bg-layer-1);
+  border-bottom: 1px solid var(--border-l1);
+  user-select: none;
+}
+.menubar__item {
+  height: 22px;
+  padding: 0 8px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-sm);
+  color: var(--label-secondary);
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.menubar__item:hover { background: var(--bg-hover); color: var(--label-primary); }
+.menubar__spacer { flex: 1; }
+.menubar__hint { font-size: var(--font-xs); color: var(--label-tertiary); }

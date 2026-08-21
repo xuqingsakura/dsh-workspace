@@ -1,0 +1,189 @@
+/* Workspace frame layout: title bar, menu bar, activity bar, sidebar, editor,
+   chat, bottom terminal, status bar — the VSCode-style grid from the prototype. */
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+  font-size: 13px;
+}
+
+/* Title bar (desktop preload mounts its own; this is the in-window fallback). */
+.titlebar {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  flex: none;
+  padding-left: 12px;
+  background: var(--dsw-alias-bg-base);
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+  user-select: none;
+}
+.titlebarTitle {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--dsw-alias-label-primary);
+  pointer-events: none;
+}
+
+/* Menu bar */
+.menubar {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  flex: none;
+  padding: 0 8px;
+  background: var(--dsw-alias-bg-layer-1);
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+  user-select: none;
+}
+.menubarItem {
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+}
+.menubarItem:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); }
+
+/* Main grid: activity | (sidebar | editor | chat) rows; bottom terminal spans editor+chat. */
+.frame {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) 220px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.leftRail {
+  display: flex;
+  flex-direction: row;
+  grid-row: 1 / -1;
+  grid-column: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.workspace {
+  display: flex;
+  flex-direction: row;
+  grid-row: 1;
+  grid-column: 2;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Activity bar */
+.activity {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 48px;
+  flex: none;
+  background: var(--dsw-alias-bg-layer-2);
+  border-right: 1px solid var(--dsw-alias-border-l1);
+  padding: 6px 0;
+}
+.activityTop, .activityBottom { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.activityItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 40px;
+  border-radius: 4px;
+  color: var(--dsw-alias-label-tertiary);
+  position: relative;
+  cursor: pointer;
+}
+.activityItem:hover { color: var(--dsw-alias-label-primary); background: var(--dsw-alias-interactive-bg-hover); }
+.activityItemActive { color: var(--dsw-alias-label-primary); }
+.activityItemActive::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 6px; bottom: 6px;
+  width: 2px;
+  border-radius: 0 2px 2px 0;
+  background: var(--dsw-alias-state-business-primary);
+}
+
+/* Columns */
+.sidebar, .editor, .chat { min-width: 0; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+.sidebar { background: var(--dsw-alias-bg-layer-1); border-right: 1px solid var(--dsw-alias-border-l1); flex: 0 0 280px; }
+.editor { background: var(--dsw-alias-bg-base); flex: 1 1 auto; }
+.chat { background: var(--dsw-alias-bg-layer-1); border-left: 1px solid var(--dsw-alias-border-l2); flex: 0 0 420px; }
+
+/* Bottom terminal panel: spans editor + chat columns only */
+.bottomPanel {
+  grid-row: 2;
+  grid-column: 2;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--dsw-alias-bg-layer-2);
+  border-top: 1px solid var(--dsw-alias-border-l1);
+  overflow: hidden;
+}
+.bottomTabs {
+  display: flex;
+  align-items: center;
+  height: 34px;
+  flex: none;
+  padding: 0 8px;
+  gap: 2px;
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-2);
+}
+.bottomTab {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+}
+.bottomTab:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); }
+.bottomTabActive { background: var(--dsw-alias-interactive-bg-active); color: var(--dsw-alias-label-primary); }
+.bottomTabsSpacer { flex: 1; }
+.bottomClose { color: var(--dsw-alias-label-tertiary); font-size: 12px; padding: 4px 6px; border-radius: 4px; cursor: pointer; }
+.bottomClose:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); }
+.bottomBody { flex: 1; min-height: 0; overflow: auto; padding: 10px 14px; font-family: var(--dsw-font-mono, monospace); font-size: 12px; }
+
+/* Status bar */
+.statusbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  flex: none;
+  padding: 0 10px;
+  background: var(--dsw-alias-state-business-primary, #4d9fff);
+  color: #ffffff;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.statusItem { display: inline-flex; align-items: center; gap: 4px; height: 100%; padding: 0 6px; opacity: 0.95; }
+.statusItem:hover { background: rgb(0 0 0 / 0.15); }
+.statusSpacer { flex: 1; }
+
+/* Drag handle */
+.handle {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 5px;
+  margin-left: -2px;
+  cursor: col-resize;
+  z-index: 10;
+}
+.handle:hover, .handleDragging { background: var(--dsw-alias-state-business-primary); opacity: 0.6; }

@@ -1,0 +1,276 @@
+/* Detached workspace window root: title bar, menu bar, body (activity bar +
+   sidebar rail + editor/chat + bottom terminal), status bar — the VSCode-style
+   layout. The activity bar and sidebar span the full body height, so opening
+   the bottom terminal never shrinks the left rail; the terminal itself lives
+   under the editor+chat row only (it never covers the file tree).
+   Column layout: sidebar | editor | chat default to 1:1:1; drag handles
+   convert a column to a fixed pixel width, chat absorbs the remainder. */
+.root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+  font-size: 13px;
+}
+
+
+/* Menu bar */
+.menubar {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  flex: none;
+  padding: 0 8px;
+  background: var(--dsw-alias-bg-layer-1);
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+  user-select: none;
+}
+.menubarItem {
+  height: 22px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  font-size: 12px;
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+}
+.menubarItem:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); }
+
+/* Body: activity bar (full height) + sidebar rail (full height) + main column */
+.body {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Activity bar */
+.activity {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 48px;
+  flex: none;
+  background: var(--dsw-alias-bg-layer-2);
+  border-right: 1px solid var(--dsw-alias-border-l1);
+  padding: 6px 0;
+}
+.activityTop, .activityBottom { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.activityItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 40px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+  position: relative;
+  cursor: pointer;
+}
+.activityItem:hover { color: var(--dsw-alias-label-primary); background: var(--dsw-alias-interactive-bg-hover); }
+.activityItemActive { color: var(--dsw-alias-label-primary); }
+.activityItemActive::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 6px; bottom: 6px;
+  width: 2px;
+  border-radius: 0 2px 2px 0;
+  background: var(--dsw-alias-state-business-primary);
+}
+
+/* Sidebar rail: full height; width adapts to the file tree content (the
+   longest visible row), clamped between sensible bounds, so a short tree
+   never leaves a huge empty panel and a deep tree does not swallow the
+   window. After a drag the inline style fixes it to pixels. */
+.sidePane {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  width: max-content;
+  min-width: 200px;
+  max-width: 42%;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--dsw-alias-bg-layer-1);
+  border-right: 1px solid var(--dsw-alias-border-l1);
+}
+
+/* Main column: editor+chat row on top, bottom terminal below (all remaining width). */
+.mainCol {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Right row: editor | handle | chat (each 1:1:1 of the whole window) */
+.rightRow {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Panes; inline flex overrides to a fixed basis after dragging.
+   Editor takes 2 of the main column's 3 shares, chat the remaining 1. */
+.editorPane, .chatPane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.editorPane { flex: 2 1 0; }
+.chatPane { flex: 1 1 0; }
+.editorPane { background: var(--dsw-alias-bg-base); }
+.chatPane { background: var(--dsw-alias-bg-layer-1); border-left: 1px solid var(--dsw-alias-border-l2); }
+/* The conversation bridge fills the chat pane. */
+.chatPane > * { flex: 1; min-height: 0; }
+
+/* Sidebar */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+.sidebarHeader {
+  display: flex;
+  align-items: center;
+  height: 34px;
+  flex: none;
+  padding: 0 10px;
+}
+.sidebarTitle { flex: 1; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--dsw-alias-label-secondary); }
+.sidebarActions { display: flex; gap: 2px; }
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+  cursor: pointer;
+}
+.iconBtn:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); }
+
+.sidebarTabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 32px;
+  flex: none;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+}
+.sidebarTab, .sidebarTabActive {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  font-size: 12px;
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+}
+.sidebarTab:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); }
+.sidebarTabActive { background: var(--dsw-alias-interactive-bg-active); color: var(--dsw-alias-label-primary); }
+
+.sidebarBody { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.cwdBar {
+  flex: none;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--dsw-alias-label-secondary);
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sidebarPlaceholder { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; font-size: 12px; color: var(--dsw-alias-label-tertiary); }
+
+/* Drag handles: 5px hit strips between columns */
+.handle {
+  flex: none;
+  width: 5px;
+  cursor: col-resize;
+  background: transparent;
+  touch-action: none;
+  z-index: 2;
+}
+.handle:hover { background: var(--dsw-alias-state-business-primary); opacity: 0.5; }
+
+/* Bottom terminal: under the editor+chat row only (never under the rail) */
+.bottomPanel {
+  flex: none;
+  height: 220px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--dsw-alias-bg-layer-2);
+  border-top: 1px solid var(--dsw-alias-border-l1);
+  overflow: hidden;
+}
+.bottomTabs {
+  display: flex;
+  align-items: center;
+  height: 34px;
+  flex: none;
+  padding: 0 8px;
+  gap: 2px;
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+}
+.bottomTabActive {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 12px;
+  border-radius: 4px;
+  background: var(--dsw-alias-interactive-bg-active);
+  font-size: 12px;
+  color: var(--dsw-alias-label-primary);
+}
+.bottomTabsSpacer { flex: 1; }
+.bottomBody { flex: 1; min-height: 0; overflow: auto; padding: 8px 14px; font-family: var(--dsw-font-mono, monospace); font-size: 12px; }
+.termRow { padding: 1px 0; color: var(--dsw-alias-label-secondary); white-space: pre-wrap; }
+.termPrompt { color: var(--dsw-alias-state-success-primary, #3fb950); font-weight: 600; }
+.termCursor { animation: blink 1s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Status bar */
+.statusbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  flex: none;
+  padding: 0 10px;
+  background: var(--dsw-alias-state-business-primary, #4d9fff);
+  color: #ffffff;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.statusItem { display: inline-flex; align-items: center; gap: 4px; height: 100%; padding: 0 6px; opacity: 0.95; }
+.statusItem:hover { background: rgb(0 0 0 / 0.15); }
+.statusSpacer { flex: 1; }

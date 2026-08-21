@@ -1,0 +1,47 @@
+/* annotations.css — 原型布局标注层（仅原型验证用，生产移除） */
+
+.annotations {
+  position: fixed;
+  pointer-events: none;
+  z-index: 100;
+  top: 84px; /* 标题栏 32 + 菜单栏 28 + 少量 */
+  left: 0; right: 0; bottom: 48px;
+  display: none;
+}
+.annotations.visible { display: block; }
+
+.annotations__item {
+  position: absolute;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  background: rgb(77 159 255 / 0.14);
+  border: 1px dashed var(--brand);
+  color: var(--brand-strong);
+  font-size: var(--font-xs);
+  line-height: 1.5;
+  white-space: pre-line;
+  pointer-events: none;
+}
+
+.annotations__item--activity { top: 20px; left: 8px; }
+.annotations__item--sidebar { top: 20px; left: calc(var(--activity-width, 48px) + 12px); }
+.annotations__item--editor { top: 20px; left: calc(var(--activity-width, 48px) + var(--sidebar-width, 280px) + 20px); }
+.annotations__item--chat { top: 20px; right: 12px; }
+.annotations__item--bottom { bottom: 8px; left: calc(var(--activity-width, 48px) + var(--sidebar-width, 280px) + 20px); }
+.annotations__item--status { bottom: -38px; right: 12px; }
+
+.annotations__toggle {
+  position: fixed;
+  right: 12px;
+  bottom: 36px;
+  z-index: 110;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #ffffff;
+  font-size: var(--font-xs);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.3);
+  pointer-events: auto;
+}
+.annotations__toggle:hover { background: var(--brand-strong); }

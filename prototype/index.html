@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>dsh-workspace · 工作台原型（VSCode 样式）</title>
+  <link rel="stylesheet" href="styles/base.css" />
+  <link rel="stylesheet" href="styles/titlebar.css" />
+  <link rel="stylesheet" href="styles/layout.css" />
+  <link rel="stylesheet" href="styles/activity.css" />
+  <link rel="stylesheet" href="styles/sidebar.css" />
+  <link rel="stylesheet" href="styles/editor.css" />
+  <link rel="stylesheet" href="styles/conversation.css" />
+  <link rel="stylesheet" href="styles/statusbar.css" />
+  <link rel="stylesheet" href="styles/terminal.css" />
+  <link rel="stylesheet" href="styles/annotations.css" />
+</head>
+<body>
+  <!-- 标题栏（Electron frameless） -->
+  <header class="titlebar" id="titlebar">
+    <div class="titlebar__brand">
+      <svg class="titlebar__icon" viewBox="0 0 50 50" aria-hidden="true">
+        <path fill="currentColor" d="M48.8 10c-.5-.3-.7.2-1 .5-.1.1-.2.2-.3.3-.8.8-1.6 1.3-2.8 1.3-1.7-.1-3.1.4-4.4 1.7-.2-1.6-1.1-2.6-2.5-3.2-.7-.3-1.4-.6-1.9-1.3-.3-.5-.4-1-.6-1.6-.1-.3-.2-.7-.6-.7-.4-.1-.6.3-.7.6-.6 1.2-.9 2.5-.8 3.8 0 3 .1 5.3 1.7 7 1.6 1.1 2.8 2.1 3.7 3.5-.2.3-.5.6-.6 1-.2.6-.4 1.1-.6 1.7-.1.4-.1.8-.3 1.2-.5-1.5-1.5-2.9-2.6-4.1-2.5 1-5.5 1.8-8.7 2-3.9.3-7.9-.2-11.6-1.5-3.4-1.2-6.5-2.7-9.2-4.6l.4 1.2c1.3 3.5 3 6.8 5 9.9 2.5 3.8 5.5 7.3 8.8 10.4.6.5 1.2 1 1.8 1.4 2.3 1.7 4.8 3.1 7.4 4.2-.3 2.5-1.4 4.9-3 6.8-.5.6-1.1 1.1-1.7 1.6 1.2-.1 2.3-.4 3.3-.9-.9 3.9-3.5 7-7.2 8.8-1.3 1.9-3 3.5-5 4.8-.2 1.1-.2 2.2 0 3.3 2-1.3 3.8-2.9 5.2-4.7 3.2-3.9 5.2-8.6 5.8-13.4 1.5-.2 2.9-.5 4.2-1 .6-.2 1.2-.4 1.8-.7-1.2.5-2.4.8-3.7 1 .3-1.4.5-2.8.5-4.2 0-.3 0-.7 0-1 2.9-.4 5.5-1.6 7.6-3.5 1.6-1.4 2.8-3 3.6-4.9.3-.6.5-1.2.7-1.8.4-1.4.7-2.8 1-4.2.5-2.4.6-4.8.3-7.2 0-.5-.1-1-.2-1.5.1-.4.2-.8.5-1 .2-.2.5-.2.7-.1z"/>
+      </svg>
+      <span class="titlebar__title">DeepSeek Harness 工作台</span>
+    </div>
+    <div class="titlebar__controls">
+      <button class="titlebar__btn" data-win="min" aria-label="最小化">&#x2013;</button>
+      <button class="titlebar__btn" data-win="max" aria-label="最大化">&#x25A1;</button>
+      <button class="titlebar__btn titlebar__btn--close" data-win="close" aria-label="关闭">&#x2715;</button>
+    </div>
+  </header>
+
+  <!-- 菜单栏（VSCode 风格，去掉"运行"） -->
+  <nav class="menubar" id="menubar">
+    <button class="menubar__item" data-menu="file">文件</button>
+    <button class="menubar__item" data-menu="edit">编辑</button>
+    <button class="menubar__item" data-menu="view">查看</button>
+    <button class="menubar__item" data-menu="go">转到</button>
+    <button class="menubar__item" data-menu="terminal">终端</button>
+    <button class="menubar__item" data-menu="help">帮助</button>
+    <span class="menubar__spacer"></span>
+    <span class="menubar__hint">工作台模式 · 会话联动</span>
+  </nav>
+
+  <!-- 主体 -->
+  <main class="frame" id="frame">
+    <div class="left-rail" id="left-rail">
+      <!-- 活动栏（只保留：资源管理器 / 搜索 / 源代码管理 / 设置） -->
+      <aside class="activity" id="activity">
+        <div class="activity__top">
+          <button class="activity__item active" data-view="explorer" title="资源管理器" aria-label="资源管理器">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v10l6 3 6-3V7l-6-3-6 3z"/><path d="M3 7l6 3 6-3M9 10v10"/></svg>
+          </button>
+          <button class="activity__item" data-view="search" title="搜索" aria-label="搜索">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          </button>
+          <button class="activity__item" data-view="scm" title="源代码管理" aria-label="源代码管理">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="8" r="2.5"/><path d="M6 8.5v7M18 10.5a4 4 0 01-4 4h-4"/></svg>
+          </button>
+        </div>
+        <div class="activity__bottom">
+          <button class="activity__item" data-view="settings" title="管理" aria-label="管理">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.6-1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3h0a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5h0a1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9v0a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>
+          </button>
+        </div>
+      </aside>
+
+      <!-- 左侧边栏：资源管理器（文件树） -->
+      <section class="sidebar" id="sidebar">
+        <div class="sidebar__panel" data-panel="explorer">
+          <div class="sidebar__header">
+            <span class="sidebar__title">资源管理器</span>
+            <span class="sidebar__actions">
+              <button class="icon-btn" data-action="refresh" title="刷新" aria-label="刷新">&#x21bb;</button>
+              <button class="icon-btn" data-action="more" title="更多操作">&#x22EF;</button>
+            </span>
+          </div>
+          <div class="sidebar__section-label">deepseek-harness</div>
+          <div class="tree__search">
+            <input type="search" placeholder="搜索文件 (Ctrl+P)" />
+          </div>
+          <nav class="tree__body" id="file-tree" aria-label="文件树"></nav>
+        </div>
+        <div class="sidebar__panel" data-panel="search" hidden>
+          <div class="sidebar__header"><span class="sidebar__title">搜索</span></div>
+          <div class="sidebar__placeholder">跨文件搜索（原型占位）</div>
+        </div>
+        <div class="sidebar__panel" data-panel="scm" hidden>
+          <div class="sidebar__header"><span class="sidebar__title">源代码管理</span></div>
+          <div class="sidebar__placeholder">Git 面板（原型占位）</div>
+        </div>
+      </section>
+
+    </div>
+    <div class="workspace" id="workspace">
+                <!-- 中间：编辑器 -->
+      <section class="editor" id="editor">
+        <div class="editor__tabs" id="editor-tabs">
+          <div class="editor__tab active" data-path="README.md"><span>README.md</span><button class="editor__tab-close" aria-label="关闭">&#x2715;</button></div>
+          <div class="editor__tab" data-path="src/index.ts"><span>src/index.ts</span><button class="editor__tab-close" aria-label="关闭">&#x2715;</button></div>
+          <div class="editor__tab" data-path="packages/host/workbench/src/index.ts"><span>packages/host/workbench/src/index.ts</span><button class="editor__tab-close" aria-label="关闭">&#x2715;</button></div>
+        </div>
+        <div class="editor__content" id="editor-content"></div>
+      </section>
+
+      <!-- 右侧：对话（保留原项目 DeepSeek Harness 显示） -->
+      <section class="chat" id="chat">
+        <div class="chat__header">
+          <nav class="chat__crumbs" aria-label="会话层级">
+            <button class="chat__crumb">会话</button>
+            <span class="chat__crumb-sep">/</span>
+            <button class="chat__crumb chat__crumb--current">修仙游戏 App 开发</button>
+          </nav>
+          <div class="chat__header-actions">
+            <div class="chat__session-switch" id="session-switch">
+              <button class="chat__session-current" id="session-current" aria-haspopup="listbox" aria-expanded="false">
+                <span class="chat__session-dot"></span>
+                <span class="chat__session-name">修仙游戏 App 开发</span>
+                <svg class="chat__caret" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M4.5 6l3.5 3.5L11.5 6z"/></svg>
+              </button>
+              <div class="chat__session-menu" id="session-menu" role="listbox" hidden>
+                <div class="chat__session-menu-head">切换会话</div>
+                <button role="option" data-session="s1" class="active">修仙游戏 App 开发</button>
+                <button role="option" data-session="s2">DSH 工作台插件</button>
+                <button role="option" data-session="s3">README 整理</button>
+                <button role="option" data-session="s4">性能优化调研</button>
+              </div>
+            </div>
+            <button class="icon-btn" data-action="detach" aria-label="在新窗口打开" title="在新窗口打开">&#x26F6;</button>
+            <button class="icon-btn" data-action="more" aria-label="更多" title="更多">&#x22EE;</button>
+          </div>
+          <div class="chat__header-utilities">
+            <span class="chat__utility">Session log</span>
+          </div>
+        </div>
+        <div class="chat__tabs" role="tablist">
+          <button class="chat__tab chat__tab--active" role="tab" aria-selected="true">对话</button>
+          <button class="chat__tab" role="tab" aria-selected="false">轨迹</button>
+        </div>
+        <div class="chat__messages" id="chat-messages"></div>
+        <div class="chat__composer">
+          <div class="chat__composer-tools">
+            <button class="icon-btn" title="添加附件">+</button>
+            <button class="chat__composer-mode" title="访问模式">Full access &#x25BE;</button>
+            <div class="chat__composer-spacer"></div>
+            <button class="chat__composer-model" title="切换模型">DeepSeek-V4-Flash &#x25BE;</button>
+            <button class="chat__composer-send" aria-label="发送" title="发送">&#x2191;</button>
+          </div>
+          <div class="chat__composer-input" contenteditable="true" data-placeholder="给智能体发消息…"></div>
+        </div>
+        <div class="chat__statusbar">
+          <span>1 轮 · 4 步</span>
+          <span>LLM 11.4s · 工具 0.2s</span>
+          <span>首 token 1.4s · 152 tok/s</span>
+          <span class="chat__statusbar-spacer"></span>
+          <span>缓存命中 63%</span>
+        </div>
+      </section>
+      </section>
+    </div>
+
+    <!-- 底部面板：终端（真正伸展开，横跨 编辑器+对话 两列） -->
+    <section class="bottom-panel" id="bottom-panel">
+      <div class="bottom-panel__tabs">
+        <button class="bottom-panel__tab active" data-panel="terminal">终端</button>
+        <div class="bottom-panel__tabs-spacer"></div>
+        <button class="bottom-panel__close" id="bottom-close" aria-label="关闭面板" title="关闭面板">&#x2715;</button>
+      </div>
+      <div class="bottom-panel__body">
+        <div class="bottom-panel__pane active" data-pane="terminal">
+          <div class="terminal__row terminal__row--prompt"><span class="terminal__prompt">PS C:\deepseek-harness></span> git status</div>
+          <div class="terminal__row">On branch master</div>
+          <div class="terminal__row">Your branch is up to date with 'origin/master'.</div>
+          <div class="terminal__row">nothing to commit, working tree clean</div>
+          <div class="terminal__row terminal__row--prompt"><span class="terminal__prompt">PS C:\deepseek-harness></span><span class="terminal__cursor">&#x2588;</span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 底部状态栏（VSCode 风格） -->
+  <footer class="statusbar" id="statusbar">
+    <span class="statusbar__item statusbar__item--branch">&#x2387; master</span>
+    <span class="statusbar__item statusbar__item--sync">&#x21BB; 同步</span>
+    <span class="statusbar__item">&#x2298; 0 &#x25B3; 0</span>
+    <span class="statusbar__spacer"></span>
+    <span class="statusbar__item">简体中文</span>
+    <span class="statusbar__item">DeepSeek Harness</span>
+    <span class="statusbar__item statusbar__item--bell"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg></span>
+  </footer>
+
+  <!-- 布局标注层（原型说明，生产移除） -->
+  <div class="annotations" id="annotations">
+    <div class="annotations__item annotations__item--activity">活动栏：<br/>文件 / 搜索 / Git / 设置</div>
+    <div class="annotations__item annotations__item--sidebar">侧边栏：文件树<br/>搜索 / 虚拟滚动 / Git 状态</div>
+    <div class="annotations__item annotations__item--editor">中列：阅读 &amp; 编辑<br/>标签页（滚轮横向滑动）</div>
+    <div class="annotations__item annotations__item--chat">右列：对话<br/>会话切换 / 消息流 / 输入</div>
+    <div class="annotations__item annotations__item--bottom">底部面板：终端（伸展）</div>
+    <div class="annotations__item annotations__item--status">状态栏：<br/>分支 / 同步 / 通知</div>
+    <button class="annotations__toggle" id="annotations-toggle">标注</button>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
+

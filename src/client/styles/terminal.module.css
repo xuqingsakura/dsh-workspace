@@ -1,0 +1,136 @@
+/* Terminal panel — follows the app theme through the dsw alias tokens while
+   keeping the prototype structure: a top bar (terminal label, clear, close),
+   a row-by-row output strip with a highlighted prompt, and a prompt+input
+   input row with a blinking cursor. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  background: var(--dsw-alias-bg-layer-2);
+  color: var(--dsw-alias-label-primary);
+}
+
+/* Top bar: tab-style label on the left, clear + close on the right */
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  flex: none;
+  padding: 0 8px;
+  background: var(--dsw-alias-bg-layer-2);
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+  user-select: none;
+}
+.label {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 12px;
+  border-radius: 4px 4px 0 0;
+  background: var(--dsw-alias-bg-layer-1);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dsw-alias-label-primary);
+}
+.spacer { flex: 1; }
+.exited { font-size: 11px; color: var(--dsw-alias-label-tertiary); }
+.action, .close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  font-size: 12px;
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+}
+.action { padding: 0 8px; }
+.action:hover, .close:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); }
+.close { width: 26px; font-size: 14px; }
+
+/* Output strip: row-by-row monospace lines */
+.output {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 6px 12px;
+  font-family: var(--dsw-font-mono, ui-monospace, Consolas, monospace);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.row {
+  padding: 1px 0;
+  color: var(--dsw-alias-label-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 12px;
+}
+
+.cursor {
+  animation: blink 1s step-end infinite;
+  color: var(--dsw-alias-label-primary);
+  user-select: none;
+  font-family: var(--dsw-font-mono, ui-monospace, Consolas, monospace);
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Prompt highlight (prototype terminal__prompt): success accent, bold */
+.promptInline {
+  color: var(--dsw-alias-state-success-primary, #3fb950);
+  font-weight: 600;
+}
+
+/* Input row: prompt + input + blinking cursor */
+.inputRow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex: none;
+  padding: 1px 0;
+  cursor: text;
+}
+.prompt {
+  color: var(--dsw-alias-state-success-primary, #3fb950);
+  font-weight: 600;
+  font-family: var(--dsw-font-mono, ui-monospace, Consolas, monospace);
+  font-size: 12px;
+  white-space: nowrap;
+  user-select: none;
+}
+/* Hidden measuring mirror: same mono font as the input, taken out of flow so
+   the flex row stays prompt -> input -> cursor. Only width is measured. */
+.mirror {
+  position: absolute;
+  left: 0;
+  top: 0;
+  visibility: hidden;
+  white-space: pre;
+  padding: 0;
+  font-family: var(--dsw-font-mono, ui-monospace, Consolas, monospace);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.input {
+  flex: none;
+  min-width: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  caret-color: transparent;
+  font-family: var(--dsw-font-mono, ui-monospace, Consolas, monospace);
+  font-size: 12px;
+}
+.cursor {
+  animation: blink 1s step-end infinite;
+  color: var(--dsw-alias-label-primary);
+  user-select: none;
+}
+@keyframes blink { 50% { opacity: 0; } }

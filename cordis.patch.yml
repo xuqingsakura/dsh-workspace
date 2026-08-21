@@ -1,0 +1,6 @@
+# Workspace bundle patch: mounts the session-scoped workspace gateway (host)
+# and the workspace UI (client). Both packages ship inside the desktop
+# runtime closure; this patch is what turns them on.
+- insert:
+    - id: workbench-window
+      name: 'dsh-workbench-window'

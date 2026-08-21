@@ -1,0 +1,51 @@
+/* terminal.css — 底部面板内容：终端 / Git / 浏览器 / 子代理 */
+
+.terminal__row { padding: 1px 0; color: var(--label-secondary); white-space: pre-wrap; }
+.terminal__prompt { color: var(--success); font-weight: 600; }
+.terminal__cursor { animation: blink 1s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+.git__row { padding: 3px 0; color: var(--label-secondary); font-family: inherit; }
+.git__row--muted { color: var(--label-tertiary); }
+.git__row--input { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+.git__row--input input {
+  flex: 1;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-layer-1);
+  border: 1px solid var(--border-l1);
+  font-size: var(--font-sm);
+}
+.git__row--input button {
+  height: 26px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  background: var(--brand);
+  color: #fff;
+  font-size: var(--font-sm);
+}
+.git__row--log { color: var(--label-secondary); font-family: "Cascadia Code", Consolas, monospace; }
+
+.browser__bar {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  margin-bottom: 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-layer-1);
+  border: 1px solid var(--border-l1);
+}
+.browser__url { font-size: var(--font-sm); color: var(--label-secondary); }
+.browser__body {
+  height: calc(100% - 40px);
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--border-l2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-sm);
+}
+.browser__body--muted, .subagent__row--muted { color: var(--label-tertiary); }
+.subagent__row { padding: 4px 0; color: var(--label-secondary); }

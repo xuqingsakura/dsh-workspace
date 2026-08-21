@@ -1,0 +1,109 @@
+/* layout.css — 工作台主体框架（VSCode 风格，grid 两列 × 两行）
+   ┌─────────────────────────────────────────────┐
+   │ left-rail (列1, 跨两行) │ workspace (列2, 行1: 编辑器|对话) │
+   │                          │───────────────────────────────────│
+   │                          │ bottom-panel (列2, 行2: 终端)      │
+   └──────────────────────────┴───────────────────────────────────┘
+   左侧 rail 永不收缩；终端只占中+右列，不留左下角空白。 */
+
+.frame {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr); /* 列1=left-rail 宽度，列2=剩余 */
+  grid-template-rows: minmax(0, 1fr) 220px;   /* 行1 主区 / 行2 底部面板 */
+  height: calc(100% - 32px - 28px - 24px); /* 标题栏 + 菜单栏 + 状态栏 */
+  overflow: hidden;
+}
+
+/* 左侧：活动栏 + 侧边栏，跨两行保持全高 */
+.left-rail {
+  display: flex;
+  flex-direction: row;
+  grid-row: 1 / -1;
+  grid-column: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* 右侧主区（行1 列2）：编辑器 | 对话 */
+.workspace {
+  display: flex;
+  flex-direction: row;
+  grid-row: 1;
+  grid-column: 2;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* 列容器 */
+.sidebar, .editor, .chat {
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.sidebar { background: var(--bg-layer-1); border-right: 1px solid var(--border-l1); flex: 0 0 280px; }
+.editor   { background: var(--bg-base); flex: 1 1 auto; }
+.chat     { background: var(--bg-layer-1); border-left: 1px solid var(--border-l2); flex: 0 0 420px; }
+
+/* 拖拽手柄（侧边栏右侧 + 对话左侧），frame 坐标系 */
+.layout-handle {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 5px;
+  margin-left: -2px;
+  cursor: col-resize;
+  z-index: 10;
+  transition: background var(--dur-fast) var(--ease);
+}
+.layout-handle:hover, .layout-handle[data-dragging] { background: var(--brand); opacity: 0.6; }
+
+/* 底部面板（行2 列2）：终端，只占中+右两列下方 */
+.bottom-panel {
+  grid-row: 2;
+  grid-column: 2;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-layer-2);
+  border-top: 1px solid var(--border-l1);
+  overflow: hidden;
+}
+.bottom-panel[hidden] { display: none; }
+
+.bottom-panel__tabs {
+  display: flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 8px;
+  gap: 2px;
+  flex: none;
+  border-bottom: 1px solid var(--border-l1);
+  background: var(--bg-layer-2);
+}
+.bottom-panel__tab {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-sm);
+  color: var(--label-secondary);
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.bottom-panel__tab:hover { background: var(--bg-hover); color: var(--label-primary); }
+.bottom-panel__tab.active { background: var(--bg-active); color: var(--label-primary); }
+.bottom-panel__tabs-spacer { flex: 1; }
+.bottom-panel__close { color: var(--label-tertiary); font-size: 12px; padding: 4px 6px; border-radius: var(--radius-sm); }
+.bottom-panel__close:hover { background: var(--bg-hover); color: var(--label-primary); }
+.bottom-panel__body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 10px 14px;
+  font-family: "Cascadia Code", Consolas, "Courier New", monospace;
+  font-size: var(--font-sm);
+}
+.bottom-panel__pane { height: 100%; }

@@ -1,0 +1,59 @@
+/* titlebar.css — 独立窗口自定义标题栏（原型模拟 Electron frameless）
+   标题绝对居中；左侧品牌图标、右侧窗口控制。 */
+
+.titlebar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding-left: 12px;
+  background: var(--bg-base);
+  border-bottom: 1px solid var(--border-l1);
+  user-select: none;
+  -webkit-app-region: drag;
+}
+
+.titlebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.titlebar__icon {
+  width: 18px;
+  height: 18px;
+  color: var(--label-primary);
+  flex: none;
+}
+
+.titlebar__title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--label-primary);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.titlebar__controls {
+  display: flex;
+  height: 100%;
+  margin-left: auto;
+  -webkit-app-region: no-drag;
+}
+
+.titlebar__btn {
+  width: 46px;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--label-secondary);
+  transition: background var(--dur-fast) var(--ease);
+}
+.titlebar__btn:hover { background: var(--bg-hover); color: var(--label-primary); }
+.titlebar__btn--close:hover { background: #e81123; color: #ffffff; }
