@@ -3,7 +3,7 @@
  * @module dsh-workbench-window/client-activity-bar
  */
 import type { ReactNode } from 'react'
-import { ExplorerIcon, ScmIcon, SearchIcon, SettingsIcon, BrowserIcon, TasksIcon } from './icons.tsx'
+import { ExplorerIcon, ScmIcon, SearchIcon, SettingsIcon, BrowserIcon, TasksIcon, HomeIcon } from './icons.tsx'
 import css from '../styles/root.module.css'
 
 /** One activity view key. */
@@ -39,6 +39,13 @@ export function ActivityBar({ active, onSelect }: ActivityBarProps) {
         ))}
       </div>
       <div className={css.activityBottom}>
+        <button type="button" className={css.activityItem} title="回到原桌面" aria-label="回到原桌面"
+          onClick={() => {
+            const d = (window as unknown as { dshDesktop?: { leaveWorkbench?: () => Promise<unknown> } }).dshDesktop
+            void d?.leaveWorkbench?.()
+          }}>
+          <HomeIcon />
+        </button>
         {bottom.map(item => (
           <button key={item.view} type="button" className={cls(item.view)} title={item.label} aria-label={item.label}
             onClick={() => onSelect(item.view)}>

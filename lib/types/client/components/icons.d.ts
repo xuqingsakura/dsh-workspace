@@ -22,6 +22,8 @@ export declare function ScmIcon(): ReactNode;
 export declare function BrowserIcon(): ReactNode;
 /** Activity-bar icon: tasks (list + check). */
 export declare function TasksIcon(): ReactNode;
+/** Activity-bar icon: home（回到原桌面）。 */
+export declare function HomeIcon(): ReactNode;
 /** Activity-bar icon: settings gear. */
 export declare function SettingsIcon(): ReactNode;
 //# sourceMappingURL=icons.d.ts.map
