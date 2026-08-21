@@ -134,23 +134,28 @@ export function WorkspaceRoot({ renderConversation, store, sessions, t }: Worksp
   const sideRef = useRef<HTMLDivElement | null>(null)
   const dragRef = useRef<DragSession | null>(null)
 
-  /** 点击活动栏图标：切换高亮、联动侧边栏；浏览器切到中间列。 */
+  /** 点击活动栏图标：切换高亮、联动侧边栏；浏览器切到中间列并自动折叠对话区。 */
   const onActivitySelect = useCallback((view: ActivityView): void => {
     setActivity(view)
     if (view === 'browser') {
       setCenterView('browser')
       setSidebarView('files')
+      // 打开浏览器时默认自动隐藏右侧对话区，让阅读区/浏览器占满更宽。
+      setChatCollapsed(true)
     } else {
       setCenterView('editor')
       setSidebarView(ACTIVITY_TO_SIDEBAR[view])
+      // 切回其他视图时还原对话区。
+      setChatCollapsed(false)
     }
   }, [])
 
-  /** 点击侧边栏视图变化：切换视图并同步活动栏高亮。 */
+  /** 点击侧边栏视图变化：切换视图并同步活动栏高亮；浏览器自动折叠对话区。 */
   const onSidebarViewChange = useCallback((view: SidebarView): void => {
     setSidebarView(view)
     setActivity(SIDEBAR_TO_ACTIVITY[view])
-    if (view === 'browser') setCenterView('browser')
+    if (view === 'browser') { setCenterView('browser'); setChatCollapsed(true) }
+    else setChatCollapsed(false)
   }, [])
 
   /** 菜单项选择处理。 */
@@ -164,7 +169,7 @@ export function WorkspaceRoot({ renderConversation, store, sessions, t }: Worksp
       return
     }
     if (menu === '查看') {
-      if (id === 'browser') { setCenterView('browser'); setActivity('browser'); return }
+      if (id === 'browser') { setCenterView('browser'); setActivity('browser'); setChatCollapsed(true); return }
       onSidebarViewChange(id as SidebarView)
       return
     }
