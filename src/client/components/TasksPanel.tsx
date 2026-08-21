@@ -24,7 +24,6 @@ export interface TasksPanelProps {
 export function TasksPanel({ scope }: TasksPanelProps) {
   return (
     <div className={css.panel}>
-      <div className={css.header}>{scope?.cwd ?? '未选择会话'}</div>
       <div className={css.section}>运行中的任务</div>
       <div className={css.empty}>暂无运行中的任务</div>
       <div className={css.section}>子代理</div>
