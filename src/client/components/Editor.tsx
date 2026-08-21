@@ -54,7 +54,8 @@ export function Editor({ scope, tabs, activeTabId, onActivate, onClose, onRegist
 
   return (
     <div className={css.root}>
-      <div ref={stripRef} className={css.tabs} onWheel={onWheel} role="tablist">
+      {tabs.length > 0 ? (
+        <div ref={stripRef} className={css.tabs} onWheel={onWheel} role="tablist">
         {tabs.map(tab => (
           <div key={tab.id} role="tab" aria-selected={tab.id === activeTabId}
             className={`${css.tab} ${tab.id === activeTabId ? css.tabActive : ''}`}
@@ -64,8 +65,8 @@ export function Editor({ scope, tabs, activeTabId, onActivate, onClose, onRegist
               onClick={(e) => { e.stopPropagation(); onClose(tab.id) }}>×</button>
           </div>
         ))}
-
-      </div>
+        </div>
+      ) : null}
       <div className={css.content}>
         {active === undefined || scope === undefined
           ? null
