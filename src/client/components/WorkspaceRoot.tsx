@@ -293,18 +293,22 @@ export function WorkspaceRoot({ renderConversation, store, sessions, t }: Worksp
       </nav>
       <div className={css.body}>
         <ActivityBar active={activity} onSelect={onActivitySelect} />
-        <div ref={sideRef} className={css.sidePane} style={paneStyle(columns?.sidebar)}>
-          <Sidebar view={sidebarView} onViewChange={onSidebarViewChange} store={store} t={t} refreshToken={fsVersion} />
-        </div>
-        <div
-          className={css.handle}
-          data-side="sidebar"
-          role="separator"
-          aria-orientation="vertical"
-          onPointerDown={onHandleDown('sidebar')}
-          onPointerMove={onHandleMove}
-          onPointerUp={onHandleUp}
-        />
+        {centerView !== 'browser' ? (
+          <>
+            <div ref={sideRef} className={css.sidePane} style={paneStyle(columns?.sidebar)}>
+              <Sidebar view={sidebarView} onViewChange={onSidebarViewChange} store={store} t={t} refreshToken={fsVersion} />
+            </div>
+            <div
+              className={css.handle}
+              data-side="sidebar"
+              role="separator"
+              aria-orientation="vertical"
+              onPointerDown={onHandleDown('sidebar')}
+              onPointerMove={onHandleMove}
+              onPointerUp={onHandleUp}
+            />
+          </>
+        ) : null}
         <div className={css.mainCol}>
           <div ref={rowRef} className={css.rightRow}>
             <div className={css.editorPane} style={paneStyle(columns?.editor)}>
