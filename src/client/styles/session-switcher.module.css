@@ -34,6 +34,7 @@
   flex-direction: column;
 }
 .item {
+  flex: none;
   display: block;
   width: 100%;
   text-align: left;

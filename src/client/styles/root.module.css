@@ -57,6 +57,7 @@
   flex-direction: column;
 }
 .menuItem {
+  flex: none;
   display: block;
   width: 100%;
   text-align: left;
