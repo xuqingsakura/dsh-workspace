@@ -17,6 +17,7 @@ import { Editor } from './Editor.tsx'
 import { BottomTerminal } from './BottomTerminal.tsx'
 import { BrowserPanel } from './BrowserPanel.tsx'
 import { SessionSwitcher } from './SessionSwitcher.tsx'
+import { AboutDialog } from './AboutDialog.tsx'
 import css from '../styles/root.module.css'
 
 /** 工作台根 props（框架共享 + owner + store）。 */
@@ -127,6 +128,8 @@ export function WorkspaceRoot({ renderConversation, store, sessions, t }: Worksp
   const [openMenu, setOpenMenu] = useState<string | undefined>(undefined)
   /** 是否折叠右侧对话区（折叠后阅读区伸展占满）。 */
   const [chatCollapsed, setChatCollapsed] = useState(false)
+  /** 是否打开关于对话框。 */
+  const [aboutOpen, setAboutOpen] = useState(false)
   // undefined = 未拖拽：三列按 1:2:1 弹性分配。
   const [columns, setColumns] = useState<Columns | undefined>(undefined)
 
@@ -178,7 +181,7 @@ export function WorkspaceRoot({ renderConversation, store, sessions, t }: Worksp
       else if (id === 'goGit') onSidebarViewChange('git')
       return
     }
-    if (id === 'about') { window.alert('DeepSeek Harness 工作台 v0.1.0'); return }
+    if (id === 'about') { setAboutOpen(true); return }
   }, [state.tabs, state.activeTabId, onSidebarViewChange])
 
   /** 测量当前列宽，供未拖拽布局做拖拽基准。 */
@@ -302,6 +305,7 @@ export function WorkspaceRoot({ renderConversation, store, sessions, t }: Worksp
           <BottomTerminal open={terminalOpen} onClose={() => { setTerminalOpen(false) }} sessionId={state.sessionId} t={t} />
         </div>
       </div>
+      <AboutDialog open={aboutOpen} onClose={() => setAboutOpen(false)} />
     </div>
   )
 }
