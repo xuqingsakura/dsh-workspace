@@ -64,7 +64,7 @@ export function Editor({ scope, tabs, activeTabId, onActivate, onClose, onRegist
               onClick={(e) => { e.stopPropagation(); onClose(tab.id) }}>×</button>
           </div>
         ))}
-        {tabs.length === 0 && <span className={css.emptyHint}>从文件树打开文件</span>}
+
       </div>
       <div className={css.content}>
         {active === undefined || scope === undefined
