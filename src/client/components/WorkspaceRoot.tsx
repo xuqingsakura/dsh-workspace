@@ -90,7 +90,6 @@ type CenterView = 'editor' | 'browser'
 const MENUS: Record<string, Array<{ id: string; label: string }>> = {
   '文件': [
     { id: 'refresh', label: '刷新' },
-    { id: 'openTerminal', label: '打开终端' },
   ],
   '编辑': [
     { id: 'copyPath', label: '复制当前文件路径' },
@@ -110,7 +109,7 @@ const MENUS: Record<string, Array<{ id: string; label: string }>> = {
     { id: 'openTerminal', label: '打开终端' },
   ],
   '帮助': [
-    { id: 'about', label: '关于 DeepSeek Harness 工作台' },
+    { id: 'about', label: '关于' },
   ],
 }
 
@@ -126,6 +125,8 @@ export function WorkspaceRoot({ renderConversation, store, sessions, t }: Worksp
   const [centerView, setCenterView] = useState<CenterView>('editor')
   const [terminalOpen, setTerminalOpen] = useState(false)
   const [openMenu, setOpenMenu] = useState<string | undefined>(undefined)
+  /** 是否折叠右侧对话区（折叠后阅读区伸展占满）。 */
+  const [chatCollapsed, setChatCollapsed] = useState(false)
   // undefined = 未拖拽：三列按 1:2:1 弹性分配。
   const [columns, setColumns] = useState<Columns | undefined>(undefined)
 
@@ -268,20 +269,30 @@ export function WorkspaceRoot({ renderConversation, store, sessions, t }: Worksp
               onPointerMove={onHandleMove}
               onPointerUp={onHandleUp}
             />
-            <div className={css.chatPane}>
-              <div className={css.chatHeader}>
-                <SessionSwitcher
-                  ids={sessionState.ids}
-                  byId={sessionState.byId}
-                  current={sessionState.current}
-                  onOpen={(id) => sessions.open(id)}
-                  t={t}
-                />
+            {chatCollapsed ? (
+              <div className={css.chatRestore}>
+                <button type="button" className={css.chatRestoreBtn} title="还原对话区" aria-label="还原对话区"
+                  onClick={() => setChatCollapsed(false)}>◧</button>
               </div>
-              <div className={css.chatBody}>
-                {renderConversation()}
+            ) : (
+              <div className={css.chatPane}>
+                <div className={css.chatHeader}>
+                  <SessionSwitcher
+                    ids={sessionState.ids}
+                    byId={sessionState.byId}
+                    current={sessionState.current}
+                    onOpen={(id) => sessions.open(id)}
+                    t={t}
+                  />
+                  <span className={css.chatHeaderSpacer} />
+                  <button type="button" className={css.iconBtn} title="最小化对话区" aria-label="最小化对话区"
+                    onClick={() => setChatCollapsed(true)}>—</button>
+                </div>
+                <div className={css.chatBody}>
+                  {renderConversation()}
+                </div>
               </div>
-            </div>
+            )}
           </div>
           <BottomTerminal open={terminalOpen} onClose={() => { setTerminalOpen(false) }} sessionId={state.sessionId} t={t} />
         </div>

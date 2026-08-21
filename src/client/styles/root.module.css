@@ -57,8 +57,11 @@
   flex-direction: column;
 }
 .menuItem {
+  display: block;
+  width: 100%;
   text-align: left;
   height: 26px;
+  line-height: 26px;
   padding: 0 8px;
   border: none;
   border-radius: 4px;
@@ -66,6 +69,9 @@
   font-size: 12px;
   color: var(--dsw-alias-label-primary);
   cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .menuItem:hover { background: var(--dsw-alias-interactive-bg-hover); }
 
@@ -178,6 +184,29 @@
   background: var(--dsw-alias-bg-layer-1);
 }
 .chatBody { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+/* 对话区折叠后：右侧窄还原条 + 头部占位 */
+.chatHeaderSpacer { flex: 1; }
+.chatRestore {
+  flex: none;
+  width: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-1);
+}
+.chatRestoreBtn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 16px;
+  cursor: pointer;
+}
+.chatRestoreBtn:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); }
 
 /* Sidebar */
 .sidebar {

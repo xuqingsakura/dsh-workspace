@@ -15,10 +15,6 @@ export interface SessionSwitcherProps {
     /** 语言包。 */
     t: TranslateNS<typeof NS>;
 }
-/**
- * 会话切换器主体：当前会话按钮 + 下拉列表。
- * @param props - 会话列表、当前会话、切换回调、语言包。
- */
 export declare function SessionSwitcher({ ids, byId, current, onOpen, t }: SessionSwitcherProps): import("react").JSX.Element;
 export default SessionSwitcher;
 //# sourceMappingURL=SessionSwitcher.d.ts.map

@@ -26,9 +26,14 @@ export interface SessionSwitcherProps {
  * 会话切换器主体：当前会话按钮 + 下拉列表。
  * @param props - 会话列表、当前会话、切换回调、语言包。
  */
+/** 把多行会话标题压成单行，避免菜单项重叠。 */
+function singleLine(value: string): string {
+  return value.replace(/\s+/g, ' ').trim()
+}
+
 export function SessionSwitcher({ ids, byId, current, onOpen, t }: SessionSwitcherProps) {
   const [open, setOpen] = useState(false)
-  const title = current !== undefined ? (byId[current]?.title ?? current) : '选择会话'
+  const title = current !== undefined ? singleLine(byId[current]?.title ?? current) : '选择会话'
   return (
     <div className={css.wrap}>
       <button type="button" className={css.button} title={t('session.switch')} aria-label={t('session.switch')}
@@ -42,7 +47,7 @@ export function SessionSwitcher({ ids, byId, current, onOpen, t }: SessionSwitch
           {ids.map(id => (
             <button key={id} type="button" className={`${css.item} ${id === current ? css.active : ''}`}
               onClick={() => { onOpen(id); setOpen(false) }}>
-              {byId[id]?.title ?? id}
+              {singleLine(byId[id]?.title ?? id)}
             </button>
           ))}
         </div>
