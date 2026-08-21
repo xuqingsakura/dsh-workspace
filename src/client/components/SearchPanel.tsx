@@ -56,7 +56,7 @@ export function SearchPanel({ scope, onOpen, t }: SearchPanelProps) {
       </div>
       {error !== undefined ? <div className={css.error}>{error}</div> : null}
       {query.trim() === '' ? (
-        <div className={css.hint}>{t('tree.loading')}</div>
+        <div className={css.hint}>{t('search.empty')}</div>
       ) : busy && results === undefined ? (
         <div className={css.hint}>{t('git.loading')}</div>
       ) : results !== undefined && results.length === 0 ? (

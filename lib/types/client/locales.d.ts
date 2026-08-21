@@ -16,6 +16,7 @@ export declare const zh: {
     readonly copy: "复制";
     readonly copied: "已复制";
     readonly 'tree.loading': "加载中…";
+    readonly 'search.empty': "输入关键词开始搜索";
     readonly 'editor.save': "保存";
     readonly 'editor.saving': "保存中…";
     readonly 'editor.saved': "已保存";
