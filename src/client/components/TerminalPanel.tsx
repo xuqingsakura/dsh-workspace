@@ -62,12 +62,17 @@ export function TerminalPanel({ sessionId, onClose, t }: TerminalPanelProps) {
 
   useLayoutEffect(() => {
     const row = rowRef.current
-    const prompt = promptRef.current
-    const cursor = cursorRef.current
     if (row === null) return
-    const promptW = prompt?.offsetWidth ?? 0
-    const cursorW = cursor?.offsetWidth ?? 0
-    setAvailableWidth(Math.max(0, row.clientWidth - promptW - cursorW))
+    // 窗口 / 面板尺寸变化时重新测量，保证长命令的输入框始终钳在可见宽度内。
+    const measure = (): void => {
+      const promptW = promptRef.current?.offsetWidth ?? 0
+      const cursorW = cursorRef.current?.offsetWidth ?? 0
+      setAvailableWidth(Math.max(0, row.clientWidth - promptW - cursorW))
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(row)
+    return () => observer.disconnect()
   }, [value, cwd])
 
   // Spawn one shell on mount (or session switch) and poll its output.

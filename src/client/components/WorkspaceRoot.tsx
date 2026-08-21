@@ -62,6 +62,16 @@ const ACTIVITY_TO_SIDEBAR: Record<ActivityView, SidebarView> = {
   settings: 'settings',
 }
 
+/** 侧边栏视图 -> 活动栏图标反向映射（点侧边栏 tab 时同步高亮；无对应图标的归到 explorer）。 */
+const SIDEBAR_TO_ACTIVITY: Record<SidebarView, ActivityView> = {
+  files: 'explorer',
+  git: 'scm',
+  search: 'search',
+  settings: 'settings',
+  tasks: 'explorer',
+  browser: 'explorer',
+}
+
 /**
  * The detached workspace window root: one full-window VSCode-style layout.
  * @param props - framework share, the conversation bridge, and the store.
@@ -75,6 +85,12 @@ export function WorkspaceRoot({ renderConversation, store, t }: WorkspaceRootPro
   const onActivitySelect = useCallback((view: ActivityView): void => {
     setActivity(view)
     setSidebarView(ACTIVITY_TO_SIDEBAR[view])
+  }, [])
+
+  /** 点击侧边栏内部 tab：切换视图并同步活动栏高亮。 */
+  const onSidebarViewChange = useCallback((view: SidebarView): void => {
+    setSidebarView(view)
+    setActivity(SIDEBAR_TO_ACTIVITY[view])
   }, [])
   const [terminalOpen, setTerminalOpen] = useState(false)
   /** 当前打开的下拉菜单名（undefined = 全部收起）。 */
@@ -142,12 +158,13 @@ export function WorkspaceRoot({ renderConversation, store, t }: WorkspaceRootPro
                   { id: 'files', label: '资源管理器' },
                   { id: 'git', label: '源代码管理' },
                   { id: 'search', label: '搜索' },
+                  { id: 'browser', label: '浏览器' },
                   { id: 'tasks', label: '任务' },
                 ].map(item => (
                   <button key={item.id} type="button" className={css.menuItem}
                     onClick={() => {
-                      setActivity(item.id as ActivityView)
-                      setSidebarView(item.id as SidebarView)
+                      // 统一走反向映射，tasks/browser 归到 explorer 高亮，避免强转无效 ActivityView。
+                      onSidebarViewChange(item.id as SidebarView)
                       setOpenMenu(undefined)
                     }}>{item.label}</button>
                 ))}
@@ -165,7 +182,7 @@ export function WorkspaceRoot({ renderConversation, store, t }: WorkspaceRootPro
       <div className={css.body}>
         <ActivityBar active={activity} onSelect={onActivitySelect} />
         <div ref={sideRef} className={css.sidePane} style={paneStyle(columns?.sidebar)}>
-          <Sidebar view={sidebarView} onViewChange={setSidebarView} store={store} t={t} />
+          <Sidebar view={sidebarView} onViewChange={onSidebarViewChange} store={store} t={t} />
         </div>
         <div
           className={css.handle}
