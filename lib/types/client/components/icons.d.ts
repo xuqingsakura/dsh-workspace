@@ -12,7 +12,7 @@ export declare function FolderIcon({ open }: {
 export declare function FileIcon({ name }: {
     name: string;
 }): ReactNode;
-/** Activity-bar icon: explorer (files). */
+/** Activity-bar icon: explorer (files) — 两个叠放文档，VSCode 资源管理器风格。 */
 export declare function ExplorerIcon(): ReactNode;
 /** Activity-bar icon: search. */
 export declare function SearchIcon(): ReactNode;

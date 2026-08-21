@@ -59,11 +59,16 @@ export function FileIcon({ name }: { name: string }): ReactNode {
   return lineSvg(<><path d="M4 1.5h5.5L13 5v8.5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-11a1 1 0 0 1 1-1z" /><path d="M9.5 1.5V5H13" /></>)
 }
 
-/** Activity-bar icon: explorer (files). */
+/** Activity-bar icon: explorer (files) — 两个叠放文档，VSCode 资源管理器风格。 */
 export function ExplorerIcon(): ReactNode {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 7v10l6 3 6-3V7l-6-3-6 3z" /><path d="M3 7l6 3 6-3M9 10v10" />
+      {/* 后层文档 */}
+      <path d="M9 3h6l4 4v9a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
+      <path d="M15 3v4h4" />
+      {/* 前层文档 */}
+      <path d="M5 9h6l4 4v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1z" />
+      <path d="M11 9v4h4" />
     </svg>
   )
 }
