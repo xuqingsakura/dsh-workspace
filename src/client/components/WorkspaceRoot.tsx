@@ -54,7 +54,7 @@ interface DragSession {
 
 /** 可调整列的合理范围（VSCode 风格下限/上限）。 */
 const MIN_SIDEBAR = 180
-const MAX_SIDEBAR = 760
+const MAX_SIDEBAR = 400
 const MIN_EDITOR = 260
 const MAX_EDITOR = 1100
 
