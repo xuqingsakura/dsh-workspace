@@ -20,12 +20,6 @@ DeepSeek Harness 独立工作台窗口插件：VSCode 风格的文件树 / 编�
 dsh plugin --profile web add "github:xuqingsakura/dsh-workspace#main"
 ```
 
-或本地开发安装（file: 形式）：
-
-```sh
-dsh plugin --profile web add "file:D:/deepseek-harness-key/dsh-workspace"
-```
-
 > 开发时改 `src/` 后需先 `pnpm run build`，否则 GitHub 安装的版本会落后于源码。
 
 ## 文档
