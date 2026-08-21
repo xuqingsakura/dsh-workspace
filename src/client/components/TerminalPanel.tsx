@@ -53,6 +53,23 @@ export function TerminalPanel({ sessionId, onClose, t }: TerminalPanelProps) {
     if (el !== null) setInputWidth(el.offsetWidth)
   }, [value])
 
+  // 输入行可用宽度（面板 - 提示符 - 光标）：超长命令时把输入框钳到可见宽度，
+  // 让文字在输入框内滚动、块光标保持可见（不会被推出面板外）。
+  const rowRef = useRef<HTMLFormElement>(null)
+  const promptRef = useRef<HTMLSpanElement>(null)
+  const cursorRef = useRef<HTMLSpanElement>(null)
+  const [availableWidth, setAvailableWidth] = useState(0)
+
+  useLayoutEffect(() => {
+    const row = rowRef.current
+    const prompt = promptRef.current
+    const cursor = cursorRef.current
+    if (row === null) return
+    const promptW = prompt?.offsetWidth ?? 0
+    const cursorW = cursor?.offsetWidth ?? 0
+    setAvailableWidth(Math.max(0, row.clientWidth - promptW - cursorW))
+  }, [value, cwd])
+
   // Spawn one shell on mount (or session switch) and poll its output.
   useEffect(() => {
     let alive = true
@@ -164,13 +181,13 @@ export function TerminalPanel({ sessionId, onClose, t }: TerminalPanelProps) {
             </div>
           )
         })}
-      <form className={css.inputRow} onSubmit={submit} onClick={(event) => { if (event.target !== inputRef.current) inputRef.current?.focus() }}>
-        <span className={css.prompt}>{cwd === '' ? '>' : `PS ${cwd}>`}</span>
+      <form ref={rowRef} className={css.inputRow} onSubmit={submit} onClick={(event) => { if (event.target !== inputRef.current) inputRef.current?.focus() }}>
+        <span ref={promptRef} className={css.prompt}>{cwd === '' ? '>' : `PS ${cwd}>`}</span>
         <span ref={mirrorRef} className={css.mirror} aria-hidden="true">{value === '' ? '\u00A0' : value}</span>
         <input
           ref={inputRef}
           className={css.input}
-          style={{ width: inputWidth, minWidth: 0 }}
+          style={{ width: inputWidth, minWidth: 0, maxWidth: availableWidth === 0 ? undefined : availableWidth }}
           value={value}
           onChange={(event) => { setValue(event.target.value) }}
           onKeyDown={onKeyDown}
@@ -178,7 +195,7 @@ export function TerminalPanel({ sessionId, onClose, t }: TerminalPanelProps) {
           autoComplete="off"
           aria-label={t('terminal.inputAria')}
         />
-        <span className={css.cursor} aria-hidden="true">█</span>
+        <span ref={cursorRef} className={css.cursor} aria-hidden="true">█</span>
       </form>
       </div>
     </div>

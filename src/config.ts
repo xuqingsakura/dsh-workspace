@@ -14,6 +14,8 @@ export interface WorkspaceConfig {
   listEntryMax: number
   /** Whether the detached-window entry button is exposed in the session header. */
   detachedWindowEnabled: boolean
+  /** 文件名搜索返回的最大结果数。 */
+  searchMax: number
 }
 
 /** Defaults applied when a config section is absent. */
@@ -21,6 +23,7 @@ export const DEFAULT_WORKSPACE_CONFIG: WorkspaceConfig = {
   terminalsPerSession: 4,
   listEntryMax: 1000,
   detachedWindowEnabled: true,
+  searchMax: 200,
 }
 
 /**
@@ -41,5 +44,8 @@ export function resolveWorkspaceConfig(raw: Partial<WorkspaceConfig> | undefined
     detachedWindowEnabled: typeof value.detachedWindowEnabled === 'boolean'
       ? value.detachedWindowEnabled
       : DEFAULT_WORKSPACE_CONFIG.detachedWindowEnabled,
+    searchMax: typeof value.searchMax === 'number' && value.searchMax > 0
+      ? value.searchMax
+      : DEFAULT_WORKSPACE_CONFIG.searchMax,
   }
 }

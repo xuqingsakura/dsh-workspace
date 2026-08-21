@@ -1,0 +1,60 @@
+/* 中间列 diff 查看器：顶部路径栏 + 滚动 diff 区。 */
+.viewer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--dsw-alias-bg-layer-2);
+  color: var(--dsw-alias-label-primary);
+}
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  flex: none;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+}
+.path {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--dsw-font-mono, ui-monospace, Consolas, monospace);
+  font-size: 12px;
+}
+.hint {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+}
+.close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 24px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 14px;
+  cursor: pointer;
+}
+.close:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); }
+.diff {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  margin: 0;
+  padding: 8px 12px;
+  font-family: var(--dsw-font-mono, ui-monospace, Consolas, monospace);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.diffAdd { color: var(--dsw-alias-state-success-primary, #3fb950); }
+.diffRemove { color: var(--dsw-alias-state-danger-primary, #f85149); }
+.diffHunk { color: var(--dsw-alias-label-tertiary); }
+.error { color: var(--dsw-alias-state-danger-primary, #f85149); padding: 8px 12px; font-size: 12px; }

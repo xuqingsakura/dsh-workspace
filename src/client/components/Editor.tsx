@@ -11,6 +11,7 @@ import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import { api, type SessionScope } from '../api.ts'
 import type { WorkbenchReadResult, WorkbenchWriteResult } from '../../workbench-types.ts'
 import { FileViewer } from './FileViewer.tsx'
+import { DiffViewer } from './DiffViewer.tsx'
 import { NS } from '../locales.ts'
 import type { EditorTab } from '../state/workspace-store.ts'
 import css from '../styles/editor.module.css'
@@ -66,7 +67,10 @@ export function Editor({ scope, tabs, activeTabId, onActivate, onClose, t }: Edi
       <div className={css.content}>
         {active === undefined || scope === undefined
           ? <div className={css.placeholder}>选择文件以查看内容</div>
-          : <FileViewer sessionId={scope.sessionId} path={active.path} readText={readText} writeText={writeText} t={t} />}
+          : active.kind === 'diff'
+            ? <DiffViewer scope={scope} path={active.diffPath ?? ''} staged={active.staged === true}
+                onClose={() => onClose(active.id)} t={t} />
+            : <FileViewer sessionId={scope.sessionId} path={active.path ?? ''} readText={readText} writeText={writeText} t={t} />}
       </div>
     </div>
   )

@@ -13,6 +13,8 @@ export interface WorkspaceConfig {
     listEntryMax: number;
     /** Whether the detached-window entry button is exposed in the session header. */
     detachedWindowEnabled: boolean;
+    /** 文件名搜索返回的最大结果数。 */
+    searchMax: number;
 }
 /** Defaults applied when a config section is absent. */
 export declare const DEFAULT_WORKSPACE_CONFIG: WorkspaceConfig;

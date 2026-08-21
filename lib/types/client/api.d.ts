@@ -9,7 +9,7 @@ export declare class WorkspaceApiError extends Error {
     readonly code: string;
     constructor(code: string, message: string);
 }
-import type { WorkbenchTerminalReadResult, WorkbenchTerminalSpawnResult } from '../workbench-types.ts';
+import type { WorkbenchGitBranch, WorkbenchGitDiffResult, WorkbenchGitLogEntry, WorkbenchGitStatusResult, WorkbenchSearchResult, WorkbenchTerminalReadResult, WorkbenchTerminalSpawnResult } from '../workbench-types.ts';
 /** One directory entry (host fs-tree shape). */
 export interface FsEntry {
     name: string;
@@ -58,6 +58,9 @@ export declare const api: {
     fsRemove: (scope: SessionScope, path: string, recursive: boolean) => Promise<{
         ok: true;
     }>;
+    fsSearch: (scope: SessionScope, query: string, signal?: AbortSignal) => Promise<{
+        results: WorkbenchSearchResult[];
+    }>;
     terminalSpawn: (scope: SessionScope, cwd?: string) => Promise<WorkbenchTerminalSpawnResult>;
     terminalWrite: (scope: SessionScope, id: string, data: string) => Promise<{
         ok: true;
@@ -67,6 +70,31 @@ export declare const api: {
         ok: true;
     }>;
     terminalCloseSession: (scope: SessionScope) => Promise<{
+        ok: true;
+    }>;
+    gitStatus: (scope: SessionScope, signal?: AbortSignal) => Promise<WorkbenchGitStatusResult>;
+    gitDiff: (scope: SessionScope, path: string | undefined, staged: boolean, signal?: AbortSignal) => Promise<WorkbenchGitDiffResult>;
+    gitLog: (scope: SessionScope, limit: number, signal?: AbortSignal) => Promise<WorkbenchGitLogEntry[]>;
+    gitBranches: (scope: SessionScope, signal?: AbortSignal) => Promise<WorkbenchGitBranch[]>;
+    gitAdd: (scope: SessionScope, paths: string[] | undefined, signal?: AbortSignal) => Promise<{
+        ok: true;
+    }>;
+    gitRestore: (scope: SessionScope, paths: string[], staged: boolean, signal?: AbortSignal) => Promise<{
+        ok: true;
+    }>;
+    gitCommit: (scope: SessionScope, message: string, signal?: AbortSignal) => Promise<{
+        ok: true;
+    }>;
+    gitCheckout: (scope: SessionScope, branch: string, signal?: AbortSignal) => Promise<{
+        ok: true;
+    }>;
+    gitFetch: (scope: SessionScope, remote: string | undefined, signal?: AbortSignal) => Promise<{
+        ok: true;
+    }>;
+    gitPull: (scope: SessionScope, signal?: AbortSignal) => Promise<{
+        ok: true;
+    }>;
+    gitPush: (scope: SessionScope, remote: string | undefined, branch: string | undefined, signal?: AbortSignal) => Promise<{
         ok: true;
     }>;
 };

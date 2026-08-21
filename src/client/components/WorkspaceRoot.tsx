@@ -54,6 +54,14 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value))
 }
 
+/** 活动栏图标 -> 侧边栏视图映射（VSCode 风格：点击图标切换侧边栏）。 */
+const ACTIVITY_TO_SIDEBAR: Record<ActivityView, SidebarView> = {
+  explorer: 'files',
+  scm: 'git',
+  search: 'search',
+  settings: 'settings',
+}
+
 /**
  * The detached workspace window root: one full-window VSCode-style layout.
  * @param props - framework share, the conversation bridge, and the store.
@@ -62,7 +70,15 @@ export function WorkspaceRoot({ renderConversation, store, t }: WorkspaceRootPro
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot)
   const [activity, setActivity] = useState<ActivityView>('explorer')
   const [sidebarView, setSidebarView] = useState<SidebarView>('files')
+
+  /** 点击活动栏图标：切换高亮并联动侧边栏视图。 */
+  const onActivitySelect = useCallback((view: ActivityView): void => {
+    setActivity(view)
+    setSidebarView(ACTIVITY_TO_SIDEBAR[view])
+  }, [])
   const [terminalOpen, setTerminalOpen] = useState(false)
+  /** 当前打开的下拉菜单名（undefined = 全部收起）。 */
+  const [openMenu, setOpenMenu] = useState<string | undefined>(undefined)
   // undefined = untouched: the three columns split 1:2:1 (editor widest).
   const [columns, setColumns] = useState<Columns | undefined>(undefined)
 
@@ -117,14 +133,39 @@ export function WorkspaceRoot({ renderConversation, store, t }: WorkspaceRootPro
     <div className={css.root}>
       <nav className={css.menubar} aria-label="菜单栏">
         {['文件', '编辑', '查看', '转到', '终端', '帮助'].map(label => (
-          <button key={label} type="button" className={css.menubarItem}
-            onClick={label === '终端' ? () => { setTerminalOpen(true) } : undefined}>{label}</button>
+          <div key={label} className={css.menuWrap}>
+            <button type="button" className={css.menubarItem}
+              onClick={() => setOpenMenu(openMenu === label ? undefined : label)}>{label}</button>
+            {label === '查看' && openMenu === '查看' ? (
+              <div className={css.menuDropdown}>
+                {[
+                  { id: 'files', label: '资源管理器' },
+                  { id: 'git', label: '源代码管理' },
+                  { id: 'search', label: '搜索' },
+                  { id: 'tasks', label: '任务' },
+                ].map(item => (
+                  <button key={item.id} type="button" className={css.menuItem}
+                    onClick={() => {
+                      setActivity(item.id as ActivityView)
+                      setSidebarView(item.id as SidebarView)
+                      setOpenMenu(undefined)
+                    }}>{item.label}</button>
+                ))}
+              </div>
+            ) : null}
+            {label === '终端' && openMenu === '终端' ? (
+              <div className={css.menuDropdown}>
+                <button type="button" className={css.menuItem}
+                  onClick={() => { setTerminalOpen(true); setOpenMenu(undefined) }}>打开终端</button>
+              </div>
+            ) : null}
+          </div>
         ))}
       </nav>
       <div className={css.body}>
-        <ActivityBar active={activity} onSelect={setActivity} />
+        <ActivityBar active={activity} onSelect={onActivitySelect} />
         <div ref={sideRef} className={css.sidePane} style={paneStyle(columns?.sidebar)}>
-          <Sidebar view={sidebarView} onViewChange={setSidebarView} store={store} />
+          <Sidebar view={sidebarView} onViewChange={setSidebarView} store={store} t={t} />
         </div>
         <div
           className={css.handle}
@@ -159,7 +200,7 @@ export function WorkspaceRoot({ renderConversation, store, t }: WorkspaceRootPro
           <BottomTerminal open={terminalOpen} onClose={() => { setTerminalOpen(false) }} sessionId={state.sessionId} t={t} />
         </div>
       </div>
-      <StatusBar />
+      <StatusBar scope={state.sessionId === undefined ? undefined : { sessionId: state.sessionId, cwd: state.cwd }} t={t} />
     </div>
   )
 }

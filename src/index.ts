@@ -11,9 +11,10 @@
  * @module dsh-workbench-window
  */
 import { open, readFile, writeFile, mkdir, rename, rm, stat, opendir } from 'node:fs/promises'
-import { join as joinPath, resolve as resolvePath, sep as pathSep } from 'node:path'
+import { join as joinPath, relative as relativePath, resolve as resolvePath, sep as pathSep } from 'node:path'
 import type { Context } from './context-types.ts'
 import { WorkbenchTerminalHost } from './terminal.ts'
+import * as git from './git.ts'
 import { resolveWorkspaceConfig, type WorkspaceConfig } from './config.ts'
 import { isTrustedApiRequest } from './trust-fence.ts'
 import { fsFailure, isWithin, LIST_ENTRY_MAX, normalizePath, rootLabel, type FsEntry } from './fs-tree.ts'
@@ -148,6 +149,30 @@ async function listDirectory(cwd: string, max: number): Promise<{ entries: FsEnt
   return { entries, truncated }
 }
 
+/** 在会话 cwd 下按文件名递归搜索（跳过隐藏目录与常见忽略目录，限制结果数）。 */
+async function searchFiles(cwd: string, query: string, max: number): Promise<{ path: string; name: string }[]> {
+  const q = query.toLowerCase()
+  const results: { path: string; name: string }[] = []
+  const skip = new Set(['node_modules', '.git', 'dist', 'out', '.dsh-home', 'vendor'])
+  async function walk(dir: string, depth: number): Promise<void> {
+    if (depth > 12 || results.length >= max) return
+    let handle
+    try { handle = await opendir(dir) } catch { return }
+    for await (const dirent of handle) {
+      if (results.length >= max) break
+      if (dirent.name.startsWith('.') || skip.has(dirent.name)) continue
+      const full = joinPath(dir, dirent.name)
+      if (dirent.isDirectory()) {
+        await walk(full, depth + 1)
+      } else if (dirent.name.toLowerCase().includes(q)) {
+        results.push({ path: normalizePath(relativePath(cwd, full)), name: dirent.name })
+      }
+    }
+  }
+  await walk(cwd, 0)
+  return results
+}
+
 /** Build the JSON API handler for one request path. */
 function buildApi(ctx: Context, config: WorkspaceConfig, terminals: WorkbenchTerminalHost) {
   return async (req: WorkspaceHttpRequest, res: WorkspaceHttpResponse): Promise<void> => {
@@ -231,6 +256,12 @@ function buildApi(ctx: Context, config: WorkspaceConfig, terminals: WorkbenchTer
           writeOk(res, { ok: true })
           return
         }
+        case 'fs.search': {
+          const query = requireString(payload, 'query')
+          const results = await searchFiles(cwd, query, config.searchMax)
+          writeOk(res, { results })
+          return
+        }
         case 'terminal.spawn': {
           const cwdArg = (payload as { cwd?: unknown }).cwd
           let spawned
@@ -271,6 +302,68 @@ function buildApi(ctx: Context, config: WorkspaceConfig, terminals: WorkbenchTer
         }
         case 'terminal.closeSession': {
           await terminals.closeSession(sessionId)
+          writeOk(res, { ok: true })
+          return
+        }
+        case 'git.status': {
+          writeOk(res, await git.gitStatus(cwd))
+          return
+        }
+        case 'git.diff': {
+          const diffPath = typeof (payload as { path?: unknown }).path === 'string' ? (payload as { path: string }).path : undefined
+          const staged = (payload as { staged?: unknown }).staged === true
+          writeOk(res, await git.gitDiff(cwd, diffPath, staged))
+          return
+        }
+        case 'git.log': {
+          const limit = typeof (payload as { limit?: unknown }).limit === 'number' ? (payload as { limit: number }).limit : 30
+          writeOk(res, await git.gitLog(cwd, limit))
+          return
+        }
+        case 'git.branches': {
+          writeOk(res, await git.gitBranches(cwd))
+          return
+        }
+        case 'git.add': {
+          const addPaths = Array.isArray((payload as { paths?: unknown }).paths) ? (payload as { paths: string[] }).paths : undefined
+          await git.gitAdd(cwd, addPaths)
+          writeOk(res, { ok: true })
+          return
+        }
+        case 'git.restore': {
+          const restorePaths = Array.isArray((payload as { paths?: unknown }).paths) ? (payload as { paths: string[] }).paths : []
+          const restoreStaged = (payload as { staged?: unknown }).staged === true
+          await git.gitRestore(cwd, restorePaths, restoreStaged)
+          writeOk(res, { ok: true })
+          return
+        }
+        case 'git.commit': {
+          const message = requireString(payload, 'message')
+          await git.gitCommit(cwd, message)
+          writeOk(res, { ok: true })
+          return
+        }
+        case 'git.checkout': {
+          const branch = requireString(payload, 'branch')
+          await git.gitCheckout(cwd, branch)
+          writeOk(res, { ok: true })
+          return
+        }
+        case 'git.fetch': {
+          const remote = typeof (payload as { remote?: unknown }).remote === 'string' ? (payload as { remote: string }).remote : undefined
+          await git.gitFetch(cwd, remote)
+          writeOk(res, { ok: true })
+          return
+        }
+        case 'git.pull': {
+          await git.gitPull(cwd)
+          writeOk(res, { ok: true })
+          return
+        }
+        case 'git.push': {
+          const pushRemote = typeof (payload as { remote?: unknown }).remote === 'string' ? (payload as { remote: string }).remote : undefined
+          const pushBranch = typeof (payload as { branch?: unknown }).branch === 'string' ? (payload as { branch: string }).branch : undefined
+          await git.gitPush(cwd, pushRemote, pushBranch)
           writeOk(res, { ok: true })
           return
         }

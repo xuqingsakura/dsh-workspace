@@ -96,4 +96,11 @@ export interface WorkbenchGitBranch {
     /** Whether this is the checked-out branch. */
     current: boolean;
 }
+/** 文件名搜索结果（路径相对会话 cwd，正斜杠）。 */
+export interface WorkbenchSearchResult {
+    /** 相对会话 cwd 的路径。 */
+    path: string;
+    /** 文件名。 */
+    name: string;
+}
 //# sourceMappingURL=workbench-types.d.ts.map

@@ -15,7 +15,15 @@ export class WorkspaceApiError extends Error {
   }
 }
 
-import type { WorkbenchTerminalReadResult, WorkbenchTerminalSpawnResult } from '../workbench-types.ts'
+import type {
+  WorkbenchGitBranch,
+  WorkbenchGitDiffResult,
+  WorkbenchGitLogEntry,
+  WorkbenchGitStatusResult,
+  WorkbenchSearchResult,
+  WorkbenchTerminalReadResult,
+  WorkbenchTerminalSpawnResult,
+} from '../workbench-types.ts'
 
 /** One directory entry (host fs-tree shape). */
 export interface FsEntry {
@@ -83,6 +91,8 @@ export const api = {
     call<{ ok: true }>('fs.rename', scopePayload(scope, { path, nextPath })),
   fsRemove: (scope: SessionScope, path: string, recursive: boolean) =>
     call<{ ok: true }>('fs.remove', scopePayload(scope, { path, recursive })),
+  fsSearch: (scope: SessionScope, query: string, signal?: AbortSignal) =>
+    call<{ results: WorkbenchSearchResult[] }>('fs.search', scopePayload(scope, { query }), signal),
   terminalSpawn: (scope: SessionScope, cwd?: string) =>
     call<WorkbenchTerminalSpawnResult>('terminal.spawn', scopePayload(scope, cwd !== undefined && cwd !== '' ? { cwd } : {})),
   terminalWrite: (scope: SessionScope, id: string, data: string) =>
@@ -93,6 +103,28 @@ export const api = {
     call<{ ok: true }>('terminal.close', scopePayload(scope, { id })),
   terminalCloseSession: (scope: SessionScope) =>
     call<{ ok: true }>('terminal.closeSession', scopePayload(scope, {})),
+  gitStatus: (scope: SessionScope, signal?: AbortSignal) =>
+    call<WorkbenchGitStatusResult>('git.status', scopePayload(scope, {}), signal),
+  gitDiff: (scope: SessionScope, path: string | undefined, staged: boolean, signal?: AbortSignal) =>
+    call<WorkbenchGitDiffResult>('git.diff', scopePayload(scope, { path, staged }), signal),
+  gitLog: (scope: SessionScope, limit: number, signal?: AbortSignal) =>
+    call<WorkbenchGitLogEntry[]>('git.log', scopePayload(scope, { limit }), signal),
+  gitBranches: (scope: SessionScope, signal?: AbortSignal) =>
+    call<WorkbenchGitBranch[]>('git.branches', scopePayload(scope, {}), signal),
+  gitAdd: (scope: SessionScope, paths: string[] | undefined, signal?: AbortSignal) =>
+    call<{ ok: true }>('git.add', scopePayload(scope, { paths }), signal),
+  gitRestore: (scope: SessionScope, paths: string[], staged: boolean, signal?: AbortSignal) =>
+    call<{ ok: true }>('git.restore', scopePayload(scope, { paths, staged }), signal),
+  gitCommit: (scope: SessionScope, message: string, signal?: AbortSignal) =>
+    call<{ ok: true }>('git.commit', scopePayload(scope, { message }), signal),
+  gitCheckout: (scope: SessionScope, branch: string, signal?: AbortSignal) =>
+    call<{ ok: true }>('git.checkout', scopePayload(scope, { branch }), signal),
+  gitFetch: (scope: SessionScope, remote: string | undefined, signal?: AbortSignal) =>
+    call<{ ok: true }>('git.fetch', scopePayload(scope, { remote }), signal),
+  gitPull: (scope: SessionScope, signal?: AbortSignal) =>
+    call<{ ok: true }>('git.pull', scopePayload(scope, {}), signal),
+  gitPush: (scope: SessionScope, remote: string | undefined, branch: string | undefined, signal?: AbortSignal) =>
+    call<{ ok: true }>('git.push', scopePayload(scope, { remote, branch }), signal),
 }
 
 /** Absolute URL of the media route for one path (images only). */

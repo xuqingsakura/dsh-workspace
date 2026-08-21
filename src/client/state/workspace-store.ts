@@ -6,14 +6,20 @@
  * @module dsh-workbench-window/client-state
  */
 
-/** One open editor tab. */
+/** 一个打开的编辑器标签：普通文件或 git 变更差异。 */
 export interface EditorTab {
-  /** Stable tab id (path-derived). */
+  /** 稳定标签 id（file 用 editor: 前缀，diff 用 diff: 前缀，避免冲突）。 */
   id: string
-  /** File path relative to the session cwd (display + fetch key). */
-  path: string
-  /** Display label (basename). */
+  /** 显示标签（basename）。 */
   title: string
+  /** 标签类型：file=普通文件；diff=git 变更差异。 */
+  kind: 'file' | 'diff'
+  /** file 标签：文件路径（相对会话 cwd）。 */
+  path?: string
+  /** diff 标签：变更文件路径。 */
+  diffPath?: string
+  /** diff 标签：true=对比暂存区(index)，false=对比工作区。 */
+  staged?: boolean
 }
 
 /** The workspace layout state. */
@@ -40,6 +46,7 @@ export interface WorkspaceActions {
   toggleExpanded(path: string): void
   selectFile(path: string): void
   openTab(path: string): void
+  openDiffTab(path: string, staged: boolean): void
   closeTab(tabId: string): void
   activateTab(tabId: string): void
 }
@@ -116,7 +123,17 @@ export function createWorkspaceActions(store: WorkspaceStore): WorkspaceActions 
       store.reduce((s) => {
         const id = tabIdOf(path)
         const existing = s.tabs.find(tab => tab.id === id)
-        const tabs = existing === undefined ? [...s.tabs, { id, path, title: titleOf(path) }] : s.tabs
+        const tabs = existing === undefined ? [...s.tabs, { id, path, title: titleOf(path), kind: 'file' as const }] : s.tabs
+        return { ...s, tabs, activeTabId: id }
+      })
+    },
+    openDiffTab: (path, staged) => {
+      store.reduce((s) => {
+        const id = `diff:${path}:${staged ? 'staged' : 'worktree'}`
+        const existing = s.tabs.find(tab => tab.id === id)
+        const tabs = existing === undefined
+          ? [...s.tabs, { id, title: `${titleOf(path)} (diff)`, kind: 'diff' as const, diffPath: path, staged }]
+          : s.tabs
         return { ...s, tabs, activeTabId: id }
       })
     },

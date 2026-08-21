@@ -4,23 +4,28 @@
  * @module dsh-workbench-window/client-sidebar
  */
 import { useEffect, useSyncExternalStore } from 'react'
+import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import { api } from '../api.ts'
 import { FileTree } from './FileTree.tsx'
+import { GitPanel } from './GitPanel.tsx'
+import { SearchPanel } from './SearchPanel.tsx'
 import type { WorkspaceStore } from '../state/workspace-store.ts'
+import { NS } from '../locales.ts'
 import css from '../styles/root.module.css'
 
 /** One sidebar view. */
-export type SidebarView = 'files' | 'git' | 'tasks'
+export type SidebarView = 'files' | 'git' | 'tasks' | 'search' | 'settings'
 
 /** Props for the sidebar. */
 export interface SidebarProps {
   view: SidebarView
   onViewChange(view: SidebarView): void
   store: WorkspaceStore
+  t: TranslateNS<typeof NS>
 }
 
 /** The sidebar component (file tree seat). */
-export function Sidebar({ view, onViewChange, store }: SidebarProps) {
+export function Sidebar({ view, onViewChange, store, t }: SidebarProps) {
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot)
 
   // Bind the session cwd into the store so the tree re-roots on switch.
@@ -42,7 +47,7 @@ export function Sidebar({ view, onViewChange, store }: SidebarProps) {
         </span>
       </div>
       <div className={css.sidebarTabs}>
-        {(['files', 'git', 'tasks'] as SidebarView[]).map(key => (
+        {(['files', 'git', 'tasks'] as const).map(key => (
           <button key={key} type="button"
             className={`${css.sidebarTab} ${view === key ? css.sidebarTabActive : ''}`}
             onClick={() => onViewChange(key)}>
@@ -62,10 +67,26 @@ export function Sidebar({ view, onViewChange, store }: SidebarProps) {
             onOpen={(path) => store.reduce(openTab(path))}
           />
         </div>
-      ) : (
-        <div className={css.sidebarPlaceholder}>
-          {view === 'git' ? 'Git 面板（开发中）' : '后台任务（开发中）'}
+      ) : view === 'git' ? (
+        <div className={css.sidebarBody}>
+          <GitPanel
+            scope={state.sessionId === undefined ? undefined : { sessionId: state.sessionId, cwd: state.cwd }}
+            onOpenDiff={(path, staged) => store.reduce(openDiffTab(path, staged))}
+            t={t}
+          />
         </div>
+      ) : view === 'search' ? (
+        <div className={css.sidebarBody}>
+          <SearchPanel
+            scope={state.sessionId === undefined ? undefined : { sessionId: state.sessionId, cwd: state.cwd }}
+            onOpen={(path) => store.reduce(openTab(path))}
+            t={t}
+          />
+        </div>
+      ) : view === 'settings' ? (
+        <div className={css.sidebarPlaceholder}>管理（开发中）</div>
+      ) : (
+        <div className={css.sidebarPlaceholder}>后台任务（开发中）</div>
       )}
     </aside>
   )
@@ -81,13 +102,25 @@ function toggleExpanded(path: string): (s: import('../state/workspace-store.ts')
   }
 }
 
+/** Immutable open-diff-tab reducer（git 变更：打开一个 diff 标签）。 */
+function openDiffTab(path: string, staged: boolean): (s: import('../state/workspace-store.ts').WorkspaceState) => import('../state/workspace-store.ts').WorkspaceState {
+  return (s) => {
+    const id = `diff:${path}:${staged ? 'staged' : 'worktree'}`
+    const existing = s.tabs.find(tab => tab.id === id)
+    const tabs = existing === undefined
+      ? [...s.tabs, { id, title: `${path.split('/').pop() ?? path} (diff)`, kind: 'diff' as const, diffPath: path, staged }]
+      : s.tabs
+    return { ...s, tabs, activeTabId: id }
+  }
+}
+
 /** Immutable open-tab reducer. */
 function openTab(path: string): (s: import('../state/workspace-store.ts').WorkspaceState) => import('../state/workspace-store.ts').WorkspaceState {
   return (s) => {
     const id = `editor:${path}`
     const existing = s.tabs.find(tab => tab.id === id)
     const tabs = existing === undefined
-      ? [...s.tabs, { id, path, title: path.split('/').pop() ?? path }]
+      ? [...s.tabs, { id, path, title: path.split('/').pop() ?? path, kind: 'file' as const }]
       : s.tabs
     return { ...s, tabs, activeTabId: id }
   }
