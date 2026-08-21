@@ -1,0 +1,29 @@
+/* 侧边栏任务面板：会话目录 + 任务/子代理分区。 */
+.panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
+  padding: 8px;
+  gap: 8px;
+}
+.header {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dsw-alias-label-primary);
+  word-break: break-all;
+}
+.section {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--dsw-alias-label-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 4px;
+}
+.empty {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  padding: 4px 0 8px;
+}

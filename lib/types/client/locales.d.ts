@@ -30,6 +30,15 @@ export declare const zh: {
     readonly 'terminal.new': "新建终端";
     readonly 'terminal.clear': "清屏";
     readonly 'terminal.closePanel': "关闭终端面板";
+    readonly 'browser.back': "后退";
+    readonly 'browser.forward': "前进";
+    readonly 'browser.home': "首页";
+    readonly 'browser.reload': "刷新";
+    readonly 'browser.addressPlaceholder': "输入网址";
+    readonly 'browser.addressAria': "浏览器地址栏";
+    readonly 'browser.go': "前往";
+    readonly 'browser.blank': "输入网址开始浏览";
+    readonly 'browser.title': "内嵌浏览器";
     readonly 'git.title': "源代码管理";
     readonly 'git.branch': "分支";
     readonly 'git.history': "提交历史";

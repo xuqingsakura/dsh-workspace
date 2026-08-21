@@ -9,12 +9,14 @@ import { api } from '../api.ts'
 import { FileTree } from './FileTree.tsx'
 import { GitPanel } from './GitPanel.tsx'
 import { SearchPanel } from './SearchPanel.tsx'
+import { BrowserPanel } from './BrowserPanel.tsx'
+import { TasksPanel } from './TasksPanel.tsx'
 import type { WorkspaceStore } from '../state/workspace-store.ts'
 import { NS } from '../locales.ts'
 import css from '../styles/root.module.css'
 
 /** One sidebar view. */
-export type SidebarView = 'files' | 'git' | 'tasks' | 'search' | 'settings'
+export type SidebarView = 'files' | 'git' | 'tasks' | 'browser' | 'search' | 'settings'
 
 /** Props for the sidebar. */
 export interface SidebarProps {
@@ -47,11 +49,11 @@ export function Sidebar({ view, onViewChange, store, t }: SidebarProps) {
         </span>
       </div>
       <div className={css.sidebarTabs}>
-        {(['files', 'git', 'tasks'] as const).map(key => (
+        {(['files', 'git', 'browser', 'tasks'] as const).map(key => (
           <button key={key} type="button"
             className={`${css.sidebarTab} ${view === key ? css.sidebarTabActive : ''}`}
             onClick={() => onViewChange(key)}>
-            {{ files: '文件', git: 'Git', tasks: '任务' }[key]}
+            {{ files: '文件', git: 'Git', browser: '浏览器', tasks: '任务' }[key]}
           </button>
         ))}
       </div>
@@ -85,8 +87,17 @@ export function Sidebar({ view, onViewChange, store, t }: SidebarProps) {
         </div>
       ) : view === 'settings' ? (
         <div className={css.sidebarPlaceholder}>管理（开发中）</div>
+      ) : view === 'browser' ? (
+        <div className={css.sidebarBody}>
+          <BrowserPanel t={t} />
+        </div>
       ) : (
-        <div className={css.sidebarPlaceholder}>后台任务（开发中）</div>
+        <div className={css.sidebarBody}>
+          <TasksPanel
+            scope={state.sessionId === undefined ? undefined : { sessionId: state.sessionId, cwd: state.cwd }}
+            t={t}
+          />
+        </div>
       )}
     </aside>
   )
