@@ -14,7 +14,29 @@ DeepSeek Harness 的 **VSCode 风格独立工作台窗口插件**：文件树 / 
 
 ## 界面预览
 
-![工作台界面](docs/workbench-screenshot.png)
+**三栏工作台（资源管理器）**
+
+![资源管理器](docs/workbench-explorer.png)
+
+**搜索视图**
+
+![搜索](docs/workbench-search.png)
+
+**Git 面板**
+
+![Git](docs/workbench-git.png)
+
+**浏览器全宽（隐藏侧边栏）**
+
+![浏览器](docs/workbench-browser.png)
+
+**任务面板 + 终端**
+
+![任务](docs/workbench-tasks.png)
+
+**任务面板**
+
+![任务2](docs/workbench-tasks-2.png)
 
 ## 安装
 
