@@ -1,6 +1,32 @@
 # dsh-workspace
 
-DeepSeek Harness 独立工作台窗口插件：VSCode 风格的文件树 / 编辑器 / 终端 / Git / 浏览器，按会话隔离。
+DeepSeek Harness 独立工作台窗口插件：VSCode 风格的文件树 / 编辑器 / 终端 / Git / 浏览器 / 搜索，按会话隔离。
+
+> ## ⚠️ 兼容性说明（重要）
+>
+> 本插件是 **fork 桌面端专属**，依赖以下**仅存在于 fork 桌面端**的外壳能力：
+>
+> - `workspace.shell` 布局 seat（`@deepseek-ai/dsh-client-ui-layout`）
+> - `window.dshDesktop.openWorkbenchWindow` / `leaveWorkbench` 桥（`apps/desktop` preload）
+> - `?dshWindow=workspace` 独立工作台窗口（`apps/desktop` main）
+>
+> 因此插件 **只能运行在 `xuqingsakura/deepseek-harness` fork 桌面端**。官方 `deepseek-ai/deepseek-harness`、社区 `anywhere-labs/deepseek-harness-desktop` 均**不兼容**——安装后能加载，但核心工作台功能（独立窗口、回到原桌面、X 进托盘）不可用。
+
+## 安装
+
+在 fork 桌面端（需带上述外壳能力）中安装：
+
+```sh
+dsh plugin --profile web add "github:xuqingsakura/dsh-workspace#main"
+```
+
+或本地开发安装（file: 形式）：
+
+```sh
+dsh plugin --profile web add "file:D:/deepseek-harness-key/dsh-workspace"
+```
+
+> 开发时改 `src/` 后需先 `pnpm run build`，否则 GitHub 安装的版本会落后于源码。
 
 ## 文档
 
@@ -10,12 +36,17 @@ DeepSeek Harness 独立工作台窗口插件：VSCode 风格的文件树 / 编�
 ## 功能
 
 - 三栏工作台：文件树 | 阅读/编辑 | 对话（保留原项目对话显示）
-- 底部终端面板（横跨中+右两列，左侧栏全高）
-- 独立窗口模式：打开时隐藏主窗口，退出恢复
-- 会话切换联动：切换会话后文件树按新会话 cwd 动态更新
-- VSCode 风格：活动栏 / 侧边栏 / 编辑器标签 / 状态栏 / 线条图标
+- 独立窗口模式：打开时隐藏主窗口，「回到原桌面」恢复主窗口
+- 文件树：懒加载、虚拟滚动、根目录/文件夹折叠、按类型彩色图标（VSCode 风格）
+- 编辑器：CodeMirror 语法高亮、Markdown 预览、Ctrl+S 保存、圆角独立标签
+- 终端：原型风格（提示符高亮、块光标、历史、长命令溢出滚动）
+- Git 面板：分支 / 提交历史 / 变更分组（折叠+滚动）/ 提交 / 点击文件看 diff
+- 浏览器：本地开发预览（iframe）
+- 搜索：会话 cwd 下文件名递归搜索
+- 任务/子代理面板、会话切换器、对话区最小化/还原
+- 菜单栏：文件（新建/保存/另存为）/ 编辑 / 查看 / 转到 / 终端 / 帮助（自绘关于）
+- 活动栏：资源管理器 / 搜索 / Git / 浏览器 / 任务 / 设置 / 回到原桌面
 
 ## 状态
 
-v0.1.0 第一版：三栏工作台、独立窗口模式、文件树、编辑器（语法高亮 / Markdown 预览 / Ctrl+S 保存）、底部终端面板已可用。
-Git 面板、内置浏览器、后台任务面板为规划中的后续功能。
+v0.1.0（开发中）：fork 桌面端完整可用。详见上方兼容性说明。
