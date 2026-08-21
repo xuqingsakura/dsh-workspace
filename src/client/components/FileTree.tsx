@@ -192,7 +192,7 @@ export function FileTree({ scope, expanded, selected, onToggleExpanded, onSelect
           }}
           title={entry.path}
         >
-          {isDir ? <span className={`${css.twisty} ${open ? '' : css.twistyClosed}`} aria-hidden="true">▼</span> : <span className={css.twisty} aria-hidden="true" />}
+          {isDir ? <span className={css.twisty} aria-hidden="true">{open ? '⌄' : '›'}</span> : <span className={css.twisty} aria-hidden="true" />}
           <span className={css.icon}>
             {isDir ? <FolderIcon open={open} /> : <FileIcon name={entry.name} />}
           </span>

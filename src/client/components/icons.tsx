@@ -47,8 +47,9 @@ function fileWithBadge(badge: string, color: string): ReactNode {
 
 /** File icon by name/extension (VSCode-seti-ish palette). */
 export function FileIcon({ name }: { name: string }): ReactNode {
-  if (/\.(ts|tsx|mts|cts)$/.test(name)) return fileWithBadge('TS', '#3178c6')
-  if (/\.(js|jsx|mjs|cjs)$/.test(name)) return fileWithBadge('JS', '#f1e05a')
+  if (/\.(tsx|jsx)$/.test(name)) return fileWithBadge('⚛', '#c084fc')
+  if (/\.(ts|mts|cts)$/.test(name)) return fileWithBadge('TS', '#3178c6')
+  if (/\.(js|mjs|cjs)$/.test(name)) return fileWithBadge('JS', '#f1e05a')
   if (/\.md$/.test(name)) return fileWithBadge('M↓', '#4d9fff')
   if (/\.json$/.test(name)) return fileWithBadge('{}', '#f1e05a')
   if (/\.(yml|yaml)$/.test(name)) return fileWithBadge('~', '#8e44ad')
