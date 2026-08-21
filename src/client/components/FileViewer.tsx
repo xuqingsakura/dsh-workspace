@@ -28,6 +28,8 @@ export type FileViewerProps = FileViewerInjected & {
   t: TranslateNS<typeof NS>
   /** Report dirty-state changes so the panel can guard tab switches. */
   onDirtyChange?: (path: string, dirty: boolean) => void
+  /** 注册当前文件的保存函数（供菜单栏「保存」触发）。 */
+  onRegisterSave?: (fn: (() => Promise<void>) | undefined) => void
 }
 
 /** Markdown file extensions rendered through MarkdownText; everything else stays a highlighted code view. */
@@ -52,7 +54,7 @@ type SaveState = { kind: 'saved' | 'error'; message: string } | { kind: 'idle' }
  * editor with an explicit save. Tracks a dirty flag; Ctrl+S and the header
  * button both save through the version-guarded write.
  */
-export function FileViewer({ sessionId, path, readText, writeText, t, onDirtyChange }: FileViewerProps) {
+export function FileViewer({ sessionId, path, readText, writeText, t, onDirtyChange, onRegisterSave }: FileViewerProps) {
   const [state, setState] = useState<ViewerState>({ status: 'loading' })
   const [text, setText] = useState('')
   const [dirty, setDirty] = useState(false)
@@ -113,6 +115,12 @@ export function FileViewer({ sessionId, path, readText, writeText, t, onDirtyCha
       void saveFile()
     }
   }, [saveFile])
+
+  // 把当前文件的保存函数注册给菜单栏（「文件→保存」可触发），卸载时注销。
+  useEffect(() => {
+    onRegisterSave?.(saveFile)
+    return () => onRegisterSave?.(undefined)
+  }, [saveFile, onRegisterSave])
 
   const markdown = state.status === 'ready' && isMarkdownPath(path)
 

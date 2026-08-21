@@ -9,8 +9,10 @@ export interface EditorProps {
     activeTabId: string | undefined;
     onActivate(tabId: string): void;
     onClose(tabId: string): void;
+    /** 把当前文件的保存函数注册给上层（菜单栏「保存」触发）。 */
+    onRegisterSave?: (fn: (() => Promise<void>) | undefined) => void;
     t: TranslateNS<typeof NS>;
 }
 /** The editor column component. */
-export declare function Editor({ scope, tabs, activeTabId, onActivate, onClose, t }: EditorProps): import("react").JSX.Element;
+export declare function Editor({ scope, tabs, activeTabId, onActivate, onClose, onRegisterSave, t }: EditorProps): import("react").JSX.Element;
 //# sourceMappingURL=Editor.d.ts.map

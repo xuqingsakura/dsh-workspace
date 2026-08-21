@@ -21,6 +21,8 @@ export type FileViewerProps = FileViewerInjected & {
     t: TranslateNS<typeof NS>;
     /** Report dirty-state changes so the panel can guard tab switches. */
     onDirtyChange?: (path: string, dirty: boolean) => void;
+    /** 注册当前文件的保存函数（供菜单栏「保存」触发）。 */
+    onRegisterSave?: (fn: (() => Promise<void>) | undefined) => void;
 };
 /**
  * The workbench file editor: loads one file on mount or path change and
@@ -28,5 +30,5 @@ export type FileViewerProps = FileViewerInjected & {
  * editor with an explicit save. Tracks a dirty flag; Ctrl+S and the header
  * button both save through the version-guarded write.
  */
-export declare function FileViewer({ sessionId, path, readText, writeText, t, onDirtyChange }: FileViewerProps): import("react").JSX.Element;
+export declare function FileViewer({ sessionId, path, readText, writeText, t, onDirtyChange, onRegisterSave }: FileViewerProps): import("react").JSX.Element;
 //# sourceMappingURL=FileViewer.d.ts.map

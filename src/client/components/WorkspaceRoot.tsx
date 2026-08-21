@@ -18,6 +18,8 @@ import { BottomTerminal } from './BottomTerminal.tsx'
 import { BrowserPanel } from './BrowserPanel.tsx'
 import { SessionSwitcher } from './SessionSwitcher.tsx'
 import { AboutDialog } from './AboutDialog.tsx'
+import { PromptDialog } from './PromptDialog.tsx'
+import { api } from '../api.ts'
 import css from '../styles/root.module.css'
 
 /** 工作台根 props（框架共享 + owner + store）。 */
@@ -90,7 +92,10 @@ type CenterView = 'editor' | 'browser'
 /** 菜单栏定义：每个菜单下的条目。 */
 const MENUS: Record<string, Array<{ id: string; label: string }>> = {
   '文件': [
-    { id: 'refresh', label: '刷新' },
+    { id: 'newFolder', label: '新建文件夹' },
+    { id: 'newFile', label: '新建文件' },
+    { id: 'save', label: '保存' },
+    { id: 'saveAs', label: '另存为' },
   ],
   '编辑': [
     { id: 'copyPath', label: '复制当前文件路径' },
@@ -130,6 +135,18 @@ export function WorkspaceRoot({ renderConversation, store, sessions, t }: Worksp
   const [chatCollapsed, setChatCollapsed] = useState(false)
   /** 是否打开关于对话框。 */
   const [aboutOpen, setAboutOpen] = useState(false)
+  /** 当前文件保存函数（FileViewer 注册，菜单「保存」触发）。 */
+  const saveHandlerRef = useRef<(() => Promise<void>) | undefined>(undefined)
+  const onRegisterSave = useCallback((fn: (() => Promise<void>) | undefined): void => {
+    saveHandlerRef.current = fn ?? undefined
+  }, [])
+  /** 文件树刷新令牌：新建文件/文件夹后自增触发重载。 */
+  const [fsVersion, setFsVersion] = useState(0)
+  /** 通用输入对话框状态。 */
+  const [prompt, setPrompt] = useState<{ title: string; placeholder: string; defaultValue: string; onConfirm: (value: string) => void } | undefined>(undefined)
+  const openPrompt = useCallback((title: string, placeholder: string, defaultValue: string, onConfirm: (value: string) => void): void => {
+    setPrompt({ title, placeholder, defaultValue, onConfirm })
+  }, [])
   // undefined = 未拖拽：三列按 1:2:1 弹性分配。
   const [columns, setColumns] = useState<Columns | undefined>(undefined)
 
@@ -165,11 +182,41 @@ export function WorkspaceRoot({ renderConversation, store, sessions, t }: Worksp
   const onMenuSelect = useCallback((menu: string, id: string): void => {
     setOpenMenu(undefined)
     if (id === 'openTerminal') { setTerminalOpen(true); return }
-    if (id === 'refresh') { window.location.reload(); return }
     if (id === 'copyPath') {
       const active = state.tabs.find(tab => tab.id === state.activeTabId)
       if (active !== undefined && active.path !== undefined) void navigator.clipboard?.writeText(active.path)
       return
+    }
+    if (menu === '文件') {
+      const scope = { sessionId: state.sessionId ?? '', cwd: state.cwd }
+      if (id === 'newFolder') {
+        openPrompt('新建文件夹', '文件夹名称', '', async (name) => {
+          await api.fsMkdir(scope, name)
+          setFsVersion(v => v + 1)
+        })
+        return
+      }
+      if (id === 'newFile') {
+        openPrompt('新建文件', '文件名', '', async (name) => {
+          await api.fsWrite(scope, name, '')
+          setFsVersion(v => v + 1)
+          store.reduce(openTab(name))
+        })
+        return
+      }
+      if (id === 'save') { void saveHandlerRef.current?.(); return }
+      if (id === 'saveAs') {
+        const active = state.tabs.find(tab => tab.id === state.activeTabId)
+        const activePath = active?.path
+        if (activePath === undefined) return
+        openPrompt('另存为', '新文件路径', activePath, async (newPath) => {
+          const { content } = await api.fsRead(scope, activePath)
+          await api.fsWrite(scope, newPath, content)
+          setFsVersion(v => v + 1)
+          store.reduce(openTab(newPath))
+        })
+        return
+      }
     }
     if (menu === '查看') {
       if (id === 'browser') { setCenterView('browser'); setActivity('browser'); setChatCollapsed(true); return }
@@ -182,7 +229,7 @@ export function WorkspaceRoot({ renderConversation, store, sessions, t }: Worksp
       return
     }
     if (id === 'about') { setAboutOpen(true); return }
-  }, [state.tabs, state.activeTabId, onSidebarViewChange])
+  }, [state.tabs, state.activeTabId, state.sessionId, state.cwd, onSidebarViewChange, openPrompt, store])
 
   /** 测量当前列宽，供未拖拽布局做拖拽基准。 */
   const measureBase = useCallback((): Columns => {
@@ -247,7 +294,7 @@ export function WorkspaceRoot({ renderConversation, store, sessions, t }: Worksp
       <div className={css.body}>
         <ActivityBar active={activity} onSelect={onActivitySelect} />
         <div ref={sideRef} className={css.sidePane} style={paneStyle(columns?.sidebar)}>
-          <Sidebar view={sidebarView} onViewChange={onSidebarViewChange} store={store} t={t} />
+          <Sidebar view={sidebarView} onViewChange={onSidebarViewChange} store={store} t={t} refreshToken={fsVersion} />
         </div>
         <div
           className={css.handle}
@@ -266,7 +313,7 @@ export function WorkspaceRoot({ renderConversation, store, sessions, t }: Worksp
                 : <Editor scope={state.sessionId === undefined ? undefined : { sessionId: state.sessionId, cwd: state.cwd }}
                     tabs={state.tabs} activeTabId={state.activeTabId} t={t}
                     onActivate={(id) => { store.reduce(s => ({ ...s, activeTabId: id })) }}
-                    onClose={(id) => { store.reduce(closeTab(id)) }} />}
+                    onClose={(id) => { store.reduce(closeTab(id)) }} onRegisterSave={onRegisterSave} />}
             </div>
             <div
               className={css.handle}
@@ -306,8 +353,28 @@ export function WorkspaceRoot({ renderConversation, store, sessions, t }: Worksp
         </div>
       </div>
       <AboutDialog open={aboutOpen} onClose={() => setAboutOpen(false)} />
+      <PromptDialog
+        open={prompt !== undefined}
+        title={prompt?.title ?? ''}
+        placeholder={prompt?.placeholder}
+        defaultValue={prompt?.defaultValue}
+        onConfirm={(value) => { prompt?.onConfirm(value); setPrompt(undefined) }}
+        onCancel={() => setPrompt(undefined)}
+      />
     </div>
   )
+}
+
+/** 不可变打开标签 reducer（新建/另存为后打开文件）。 */
+function openTab(path: string): (s: import('../state/workspace-store.ts').WorkspaceState) => import('../state/workspace-store.ts').WorkspaceState {
+  return (s) => {
+    const id = `editor:${path}`
+    const existing = s.tabs.find(tab => tab.id === id)
+    const tabs = existing === undefined
+      ? [...s.tabs, { id, path, title: path.split('/').pop() ?? path, kind: 'file' as const }]
+      : s.tabs
+    return { ...s, tabs, activeTabId: id }
+  }
 }
 
 /** 不可变关闭标签 reducer（保持活动标签有效）。 */

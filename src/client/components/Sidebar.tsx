@@ -23,6 +23,8 @@ export interface SidebarProps {
   view: SidebarView
   onViewChange(view: SidebarView): void
   store: WorkspaceStore
+  /** 文件树刷新令牌（新建文件/文件夹后自增，触发重载）。 */
+  refreshToken?: number
   t: TranslateNS<typeof NS>
 }
 
@@ -37,7 +39,7 @@ const VIEW_TITLE: Record<SidebarView, string> = {
 }
 
 /** The sidebar component (file tree seat). */
-export function Sidebar({ view, onViewChange, store, t }: SidebarProps) {
+export function Sidebar({ view, onViewChange, store, refreshToken, t }: SidebarProps) {
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot)
 
   // Bind the session cwd into the store so the tree re-roots on switch.
@@ -68,6 +70,7 @@ export function Sidebar({ view, onViewChange, store, t }: SidebarProps) {
             onToggleExpanded={(path) => store.reduce(toggleExpanded(path))}
             onSelect={(path) => store.reduce(s => ({ ...s, selected: path }))}
             onOpen={(path) => store.reduce(openTab(path))}
+            refreshToken={refreshToken}
           />
         </div>
       ) : view === 'git' ? (

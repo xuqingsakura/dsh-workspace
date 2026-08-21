@@ -23,11 +23,13 @@ export interface EditorProps {
   activeTabId: string | undefined
   onActivate(tabId: string): void
   onClose(tabId: string): void
+  /** 把当前文件的保存函数注册给上层（菜单栏「保存」触发）。 */
+  onRegisterSave?: (fn: (() => Promise<void>) | undefined) => void
   t: TranslateNS<typeof NS>
 }
 
 /** The editor column component. */
-export function Editor({ scope, tabs, activeTabId, onActivate, onClose, t }: EditorProps) {
+export function Editor({ scope, tabs, activeTabId, onActivate, onClose, onRegisterSave, t }: EditorProps) {
   const stripRef = useRef<HTMLDivElement>(null)
   const active = tabs.find(tab => tab.id === activeTabId)
 
@@ -70,7 +72,7 @@ export function Editor({ scope, tabs, activeTabId, onActivate, onClose, t }: Edi
           : active.kind === 'diff'
             ? <DiffViewer scope={scope} path={active.diffPath ?? ''} staged={active.staged === true}
                 onClose={() => onClose(active.id)} t={t} />
-            : <FileViewer sessionId={scope.sessionId} path={active.path ?? ''} readText={readText} writeText={writeText} t={t} />}
+            : <FileViewer sessionId={scope.sessionId} path={active.path ?? ''} readText={readText} writeText={writeText} t={t} onRegisterSave={onRegisterSave} />}
       </div>
     </div>
   )

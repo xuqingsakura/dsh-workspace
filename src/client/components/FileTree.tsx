@@ -33,6 +33,8 @@ export interface FileTreeProps {
   onToggleExpanded(path: string): void
   onSelect(path: string): void
   onOpen(path: string): void
+  /** 文件树刷新令牌：变化时重新加载根目录（新建文件/文件夹后自增）。 */
+  refreshToken?: number
 }
 
 /** 每行固定高度（虚拟滚动依赖，与 .row 高度一致）。 */
@@ -52,7 +54,7 @@ async function loadChildren(scope: SessionScope, path: string): Promise<TreeRow[
  * 文件树组件。
  * @param props - 会话作用域、展开/选择状态、回调。
  */
-export function FileTree({ scope, expanded, selected, onToggleExpanded, onSelect, onOpen }: FileTreeProps) {
+export function FileTree({ scope, expanded, selected, onToggleExpanded, onSelect, onOpen, refreshToken }: FileTreeProps) {
   const [rows, setRows] = useState<TreeRow[] | undefined>(undefined)
   const [error, setError] = useState<string | undefined>(undefined)
   const [loading, setLoading] = useState(false)
@@ -78,7 +80,7 @@ export function FileTree({ scope, expanded, selected, onToggleExpanded, onSelect
       })
       .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
-  }, [scope?.sessionId, scope?.cwd])
+  }, [scope?.sessionId, scope?.cwd, refreshToken])
 
   // 跟踪滚动容器高度（窗口尺寸变化时更新）。
   useLayoutEffect(() => {

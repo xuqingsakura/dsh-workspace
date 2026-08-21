@@ -9,10 +9,12 @@ export interface FileTreeProps {
     onToggleExpanded(path: string): void;
     onSelect(path: string): void;
     onOpen(path: string): void;
+    /** 文件树刷新令牌：变化时重新加载根目录（新建文件/文件夹后自增）。 */
+    refreshToken?: number;
 }
 /**
  * 文件树组件。
  * @param props - 会话作用域、展开/选择状态、回调。
  */
-export declare function FileTree({ scope, expanded, selected, onToggleExpanded, onSelect, onOpen }: FileTreeProps): import("react").JSX.Element;
+export declare function FileTree({ scope, expanded, selected, onToggleExpanded, onSelect, onOpen, refreshToken }: FileTreeProps): import("react").JSX.Element;
 //# sourceMappingURL=FileTree.d.ts.map
